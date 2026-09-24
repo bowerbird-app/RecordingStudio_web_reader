@@ -53,7 +53,8 @@ module RecordingStudio
           html: body,
           metadata: metadata_for(doc),
           links: links_for(doc, base),
-          images: images
+          images: images,
+          challenge: Challenge.detect(doc, status: exchange.fetch(:status))
         )
       end
 

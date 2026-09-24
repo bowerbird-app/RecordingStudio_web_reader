@@ -87,9 +87,51 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "https://example.com/photo.jpg"
     assert_includes response.body, "html_attribute"
     assert_includes response.body, "Dummy paywall analysis"
+    refute_includes response.body, "This response is a JavaScript challenge."
+  end
+
+  test "a javascript interstitial shows a challenge alert" do
+    html = <<~HTML
+      <html>
+        <head><title>Just a moment...</title></head>
+        <body>
+          <noscript>Enable JavaScript and cookies to continue</noscript>
+          <script src="/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1"></script>
+        </body>
+      </html>
+    HTML
+    client = html_client(html, status: 403)
+    with_singleton_method(Resolv, :getaddresses, ->(*) { ["93.184.216.34"] }) do
+      with_singleton_method(Net::HTTP, :new, ->(*) { client }) do
+        get root_path, params: { url: "https://example.com/challenge" }
+      end
+    end
+
+    assert_response :success
+    assert_includes response.body, "This response is a JavaScript challenge."
+    assert_includes response.body, "Enable JavaScript and cookies to continue"
+    assert_includes response.body, "Just a moment..."
   end
 
   private
+
+  def html_client(html, status:)
+    response_body = Struct.new(:code, :headers, :body, keyword_init: true) do
+      def each_header
+        headers.each { |key, value| yield(key, value) }
+      end
+
+      def read_body
+        yield body
+      end
+    end.new(code: status, headers: { "content-type" => "text/html" }, body: html)
+    client = Object.new
+    %i[ipaddr= use_ssl= verify_mode= open_timeout= read_timeout= write_timeout= max_retries=].each do |setter|
+      client.define_singleton_method(setter) { |_value| nil }
+    end
+    client.define_singleton_method(:request) { |_req, &block| block.call(response_body) }
+    client
+  end
 
   def with_singleton_method(object, name, implementation)
     singleton = object.singleton_class

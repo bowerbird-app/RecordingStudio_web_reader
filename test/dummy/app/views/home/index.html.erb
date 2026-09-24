@@ -46,6 +46,12 @@
         ) %>
       <% end %>
       <% card.body do %>
+        <% if @page.challenge %>
+          <%= render FlatPack::Alert::Component.new(
+            style: :warning,
+            description: "This response is a JavaScript challenge."
+          ) %>
+        <% end %>
         <%= render FlatPack::List::Component.new(divider: true) do %>
           <% [
             ["Requested URL", @page.url],

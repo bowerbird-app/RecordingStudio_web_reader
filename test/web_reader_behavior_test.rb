@@ -150,9 +150,14 @@ class WebReaderBehaviorTest < Minitest::Test
     parsed = JSON.parse(payload)
     assert_equal "html_attribute", parsed.dig("images", 0, "dimension_source")
     assert_equal "html_attribute", parsed.dig("images", 0, "source")
+    assert_nil page.challenge
+    assert_nil parsed["challenge"]
     restored = RecordingStudio::WebReader::Page.from_h(parsed)
     assert_equal :html_attribute, restored.images.first[:dimension_source]
     assert_equal "Example Article", restored.title
+    assert_nil restored.challenge
+    parsed.delete("challenge")
+    assert_nil RecordingStudio::WebReader::Page.from_h(parsed).challenge
   end
 
   def test_description_falls_back_to_open_graph
@@ -197,6 +202,7 @@ class WebReaderBehaviorTest < Minitest::Test
 
       assert_equal status, page.status
       assert_includes page.text, "Status body #{status}"
+      assert_nil page.challenge
     end
   end
 
@@ -208,6 +214,9 @@ class WebReaderBehaviorTest < Minitest::Test
 
     assert_equal 403, page.status
     assert_equal "Enable JavaScript and cookies to continue", page.text
+    assert_equal :javascript, page.challenge.kind
+    noscript = page.challenge.evidence.find { |item| item.path == "noscript" }
+    assert_equal "Enable JavaScript and cookies to continue", noscript.value
   end
 
   def test_read_skips_noscript_when_visible_text_exists
@@ -217,6 +226,51 @@ class WebReaderBehaviorTest < Minitest::Test
     page, = read_page("https://example.com/story", [html_response(html)])
 
     assert_equal "Visible story", page.text
+    assert_nil page.challenge
+  end
+
+  def test_javascript_interstitial_records_challenge_evidence
+    html = <<~HTML
+      <html>
+        <head><title>Just a moment...</title></head>
+        <body>
+          <div role="main"><noscript>Enable JavaScript and cookies to continue</noscript></div>
+          <script src="/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1"></script>
+        </body>
+      </html>
+    HTML
+    page, = read_page("https://example.com/challenge", [html_response(html, status: 403)])
+    payload = JSON.parse(JSON.generate(page.to_h))
+    restored = RecordingStudio::WebReader::Page.from_h(payload)
+
+    assert_equal :javascript, page.challenge.kind
+    assert_equal "/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1", evidence_value(page, "script")
+    assert_equal "Just a moment...", evidence_value(page, "title")
+    assert_equal "Enable JavaScript and cookies to continue", evidence_value(page, "noscript")
+    assert_equal 403, evidence_value(page, "status")
+    assert_equal "javascript", payload.dig("challenge", "kind")
+    assert_equal :javascript, restored.challenge.kind
+    assert_equal :html, restored.challenge.evidence.find { |item| item.path == "script" }.source
+    assert page.to_h.key?("html")
+  end
+
+  def test_challenge_script_marks_a_page_without_an_interstitial_title
+    html = "<html><body><p>Please wait</p>" \
+           "<iframe src=\"https://challenges.cloudflare.com/cdn-cgi/challenge-platform\"></iframe></body></html>"
+    page, = read_page("https://example.com/wait", [html_response(html)])
+
+    assert_equal :javascript, page.challenge.kind
+    assert_equal "https://challenges.cloudflare.com/cdn-cgi/challenge-platform", evidence_value(page, "script")
+    assert_nil(page.challenge.evidence.find { |item| item.path == "title" })
+  end
+
+  def test_interstitial_title_without_a_javascript_request_is_a_document
+    html = "<html><head><title>Just a moment...</title></head>" \
+           "<body><article><p>A real essay.</p></article></body></html>"
+    page, = read_page("https://example.com/essay", [html_response(html, status: 403)])
+
+    assert_equal "A real essay.", page.text
+    assert_nil page.challenge
   end
 
   def test_non_html_response_raises_with_status
@@ -763,10 +817,15 @@ class WebReaderBehaviorTest < Minitest::Test
       metadata: RecordingStudio::WebReader::Page::Metadata.new(open_graph: {}, twitter: {}, json_ld: [], article: {},
                                                                meta: {}),
       links: Array.new(30) { |index| { url: "https://example.com/#{index}", text: index.to_s, rel: [] } },
-      images: Array.new(20) { |index| { url: "https://example.com/#{index}.jpg", alt: "", width: nil, height: nil, aspect_ratio: nil, source: :html_attribute, dimension_source: nil, variants: [] } }
+      images: Array.new(20) do |index|
+        { url: "https://example.com/#{index}.jpg", alt: "", width: nil, height: nil, aspect_ratio: nil,
+          source: :html_attribute, dimension_source: nil, variants: [] }
+      end,
+      challenge: nil
     )
     projected = RecordingStudio::WebReader::AiTool.project(page)
     refute projected.key?("html")
+    assert_nil projected["challenge"]
     assert_equal true, projected["text_truncated"]
     assert_equal 8_000, projected["text"].length
     assert_equal 30, projected["link_count"]
@@ -811,6 +870,10 @@ class WebReaderBehaviorTest < Minitest::Test
   end
 
   private
+
+  def evidence_value(page, path)
+    page.challenge.evidence.find { |item| item.path == path }&.value
+  end
 
   def without_network(&block)
     Resolv.stub(:getaddresses, ->(*) { flunk "DNS ran" }) do

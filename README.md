@@ -91,9 +91,12 @@ HTTP 403, 404, and 500 are pages. A timeout, an unsafe URL, a non-HTML body, or 
 | `page.metadata` | Structured metadata |
 | `page.links` | Absolute HTTP and HTTPS links |
 | `page.images` | Discovered images |
+| `page.challenge` | JavaScript interstitial, or nil |
 | `page.to_h` | JSON-safe hash with string keys |
 
-`page.text` drops `script`, `style`, `nav`, `footer`, `header`, `aside`, and `form`, then prefers `article`, `main`, or `[role=main]`. The raw HTML stays on `page.html`. Extraction does not call a language model. It is a deterministic selection in Nokogiri, not a full readability port. One HTML parser keeps the gem small enough for other Recording Studio gems to depend on.
+`page.text` drops `script`, `style`, `nav`, `footer`, `header`, `aside`, and `form`, then prefers `article`, `main`, or `[role=main]`. When that selection is empty, the text is the `noscript` sentence. The raw HTML stays on `page.html`. Extraction does not call a language model. It is a deterministic selection in Nokogiri, not a full readability port. One HTML parser keeps the gem small enough for other Recording Studio gems to depend on.
+
+`page.challenge` stays nil when the body looks like the document you asked for, including an HTTP 403 that still contains the article. A JavaScript interstitial sets `kind` to `:javascript`. `evidence` uses the same `source`, `path`, and `value` shape as an analysis, and can include the status, title, noscript sentence, and challenge script URL. The check is deterministic. `read` does not retry. A later browser fetcher is how a caller asks again.
 
 ## Metadata
 
@@ -240,7 +243,7 @@ The dummy app registers a local `:paywall` analysis that looks only at text leng
 
 This gem does not depend on Recording Studio AI. When that gem is already loaded, the engine registers a `visit_web_page` tool. The tool calls `RecordingStudio::WebReader.read`. It does not open its own HTTP path.
 
-The tool result omits raw HTML. Text is capped at 8,000 characters. Links are capped at 25 and images at 15. `text_truncated`, `link_count`, and `image_count` say what was left out. The Ruby page is still complete.
+The tool result omits raw HTML and includes `challenge`. Text is capped at 8,000 characters. Links are capped at 25 and images at 15. `text_truncated`, `link_count`, and `image_count` say what was left out. The Ruby page is still complete.
 
 ## Instrumentation
 

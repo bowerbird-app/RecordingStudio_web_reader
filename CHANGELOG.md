@@ -14,3 +14,4 @@
 - `read.recording_studio_web_reader` and `probe_image.recording_studio_web_reader` notifications.
 - An explicit caller-supplied cache.
 - A dummy page that inspects a fetched page.
+- `page.challenge` records a JavaScript interstitial without retrying the fetch.

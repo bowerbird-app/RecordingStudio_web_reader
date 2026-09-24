@@ -50,7 +50,7 @@ module RecordingStudio
     Page = Data.define(
       :url, :final_url, :status, :headers, :content_type,
       :title, :description, :canonical_url, :text, :html,
-      :metadata, :links, :images
+      :metadata, :links, :images, :challenge
     ) do
       def extract(name, namespace: WebReader::DEFAULT_NAMESPACE, **context)
         WebReader.extract(name, self, namespace:, **context)
@@ -81,7 +81,8 @@ module RecordingStudio
               meta: metadata.meta
             },
             links: links,
-            images: images
+            images: images,
+            challenge: challenge&.to_h
           }
         )
       end
@@ -108,7 +109,8 @@ module RecordingStudio
             meta: meta.fetch("meta", {})
           ),
           links: Array(data["links"]).map { |link| JsonValue.symbolize(link) },
-          images: Array(data["images"]).map { |image| restore_image(image) }
+          images: Array(data["images"]).map { |image| restore_image(image) },
+          challenge: Challenge.from_h(data["challenge"])
         )
       end
 
