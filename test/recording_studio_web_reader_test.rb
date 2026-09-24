@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioWebReaderTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.1.0", ::RecordingStudio::WebReader::VERSION
+    assert_equal "0.1.1", ::RecordingStudio::WebReader::VERSION
   end
 
   def test_engine_exists

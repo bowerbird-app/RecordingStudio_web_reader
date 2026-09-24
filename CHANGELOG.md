@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1] - 2026-09-24
+
+### Fixed
+
+- The dummy reads `TYPESAFE_API_KEY` or `typesafe`, so Jev can decide.
+- History triggers are rebuilt after `correlation_id` is removed, so a finished decision can be saved.
+
 ## [0.1.0] - 2026-09-24
 
 ### Added
