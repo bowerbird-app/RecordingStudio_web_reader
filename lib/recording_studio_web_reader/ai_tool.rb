@@ -58,9 +58,8 @@ module RecordingStudio
       end
 
       def self.project(page, content: nil)
-        full = content.to_s == "full"
-        hash = observation(page, full: full)
-        fit!(hash) if full
+        hash = observation(page, full: content.to_s == "full")
+        fit!(hash)
         hash
       end
 
@@ -88,11 +87,46 @@ module RecordingStudio
       end
 
       def self.fit!(hash)
-        while JSON.generate(hash).bytesize > RESULT_BYTE_BUDGET && hash["text"].bytesize > 1_000
+        shed_metadata(hash) unless within_budget?(hash)
+        shed_lists(hash) unless within_budget?(hash)
+        shed_headers(hash) unless within_budget?(hash)
+        shrink_text(hash)
+        hash
+      end
+
+      def self.within_budget?(hash)
+        JSON.generate(hash).bytesize <= RESULT_BYTE_BUDGET
+      end
+
+      def self.shed_metadata(hash)
+        metadata = hash["metadata"]
+        return unless metadata.is_a?(Hash)
+
+        metadata["json_ld"] = []
+        return if within_budget?(hash)
+
+        metadata["open_graph"] = {}
+        metadata["twitter"] = {}
+        metadata["article"] = {}
+        metadata["meta"] = {}
+      end
+
+      def self.shed_lists(hash)
+        hash["links"] = []
+        hash["images"] = []
+      end
+
+      def self.shed_headers(hash)
+        hash["headers"] = {}
+        evidence = hash.dig("challenge", "evidence")
+        hash["challenge"]["evidence"] = [] if evidence.is_a?(Array)
+      end
+
+      def self.shrink_text(hash)
+        while !within_budget?(hash) && hash["text"].to_s.bytesize > 1_000
           hash["text"] = hash["text"].byteslice(0, (hash["text"].bytesize * 0.8).to_i).scrub
           hash["text_truncated"] = true
         end
-        hash
       end
     end
   end

@@ -564,6 +564,23 @@ class WebReaderBehaviorTest < Minitest::Test
     assert_nil blocked[:width]
   end
 
+  def test_probe_images_stops_after_ten_fetches_and_reuses_a_url
+    images = Array.new(11) { |index| bare_image("https://cdn.example.com/#{index}.png") }
+    images << bare_image("https://cdn.example.com/0.png")
+    page = sample_page(images: images)
+    calls = 0
+    RecordingStudio::WebReader.stub(:probe_image, lambda { |url|
+      calls += 1
+      { url: url, width: 4, height: 2, aspect_ratio: 2.0, dimension_source: :image_probe }
+    }) do
+      probed = RecordingStudio::WebReader.probe_images(page)
+
+      assert_equal RecordingStudio::WebReader::PROBE_IMAGE_LIMIT, calls
+      assert_nil probed.images[10][:width]
+      assert_equal 4, probed.images.last[:width]
+    end
+  end
+
   def test_explicit_cache_stores_observations_and_still_checks_dns
     cache = KeywordCache.new
     html = "<!doctype html><html><title>Cached</title><body><p>Cached body</p></body></html>"
@@ -630,9 +647,10 @@ class WebReaderBehaviorTest < Minitest::Test
         body: "<!doctype html><html><title>Rendered</title><body><article>" \
               "<p>From the browser</p></article></body></html>",
         content_type: "text/html",
-        location: nil
+        location: nil,
+        address: hop[:address]
       }
-    })
+    }, override: true)
     page = nil
     Net::HTTP.stub(:new, ->(*) { flunk "HTTP fetcher ran" }) do
       Resolv.stub(:getaddresses, ["93.184.216.34"]) do
@@ -642,6 +660,27 @@ class WebReaderBehaviorTest < Minitest::Test
 
     assert_equal "Rendered", page.title
     assert_equal "From the browser", page.text
+  end
+
+  def test_a_fetcher_that_reports_another_address_is_refused
+    RecordingStudio::WebReader.register_fetcher(:browser, lambda { |hop|
+      {
+        status: 200,
+        headers: { "content-type" => "text/html" },
+        body: "<html><title>Wrong</title></html>",
+        content_type: "text/html",
+        location: nil,
+        address: "8.8.8.8",
+        pinned: hop[:address]
+      }
+    }, override: true)
+
+    Resolv.stub(:getaddresses, ["93.184.216.34"]) do
+      error = assert_raises(RecordingStudio::WebReader::UnsafeUrlError) do
+        RecordingStudio::WebReader.read("https://example.com/app", strategy: :browser)
+      end
+      assert_equal "The URL is not allowed", error.message
+    end
   end
 
   def test_unknown_fetch_strategy_is_a_configuration_error
@@ -848,6 +887,18 @@ class WebReaderBehaviorTest < Minitest::Test
     assert_equal true, fitted["text_truncated"]
     assert_operator JSON.generate(fitted).bytesize, :<=, RecordingStudio::WebReader::AiTool::RESULT_BYTE_BUDGET
 
+    bulky = page.with(
+      text: "The article stays.",
+      metadata: RecordingStudio::WebReader::Page::Metadata.new(
+        open_graph: {}, twitter: {}, article: {}, meta: {},
+        json_ld: [{ "blob" => "z" * 250_000 }]
+      )
+    )
+    trimmed = RecordingStudio::WebReader::AiTool.project(bulky)
+    assert_equal "The article stays.", trimmed["text"]
+    assert_equal [], trimmed.dig("metadata", "json_ld")
+    assert_operator JSON.generate(trimmed).bytesize, :<=, RecordingStudio::WebReader::AiTool::RESULT_BYTE_BUDGET
+
     tools = ToolRegistry.new
     unless defined?(::RecordingStudioAI)
       Object.const_set(:RecordingStudioAI, Module.new)
@@ -887,6 +938,32 @@ class WebReaderBehaviorTest < Minitest::Test
   end
 
   private
+
+  def bare_image(url)
+    { url: url, alt: "", width: nil, height: nil, aspect_ratio: nil, source: :html_attribute,
+      dimension_source: nil, variants: [] }
+  end
+
+  def sample_page(images:)
+    RecordingStudio::WebReader::Page.new(
+      url: "https://example.com/a",
+      final_url: "https://example.com/a",
+      status: 200,
+      headers: {},
+      content_type: "text/html",
+      title: "Probe",
+      description: nil,
+      canonical_url: nil,
+      text: "Hello",
+      html: "<html></html>",
+      metadata: RecordingStudio::WebReader::Page::Metadata.new(
+        open_graph: {}, twitter: {}, json_ld: [], article: {}, meta: {}
+      ),
+      links: [],
+      images: images,
+      challenge: nil
+    )
+  end
 
   def evidence_value(page, path)
     page.challenge.evidence.find { |item| item.path == path }&.value

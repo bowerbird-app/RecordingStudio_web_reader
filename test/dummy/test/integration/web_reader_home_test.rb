@@ -147,13 +147,14 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
   end
 
   test "open in a browser uses the browser fetcher" do
-    RecordingStudio::WebReader.register_fetcher(:browser, lambda { |_hop|
+    RecordingStudio::WebReader.register_fetcher(:browser, lambda { |hop|
       {
         status: 200,
         headers: { "content-type" => "text/html" },
         body: "<!doctype html><html><title>Browser article</title><body><article><p>Opened in the browser.</p></article></body></html>",
         content_type: "text/html",
-        location: nil
+        location: nil,
+        address: hop[:address]
       }
     }, override: true)
 

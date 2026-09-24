@@ -121,6 +121,7 @@ module RecordingStudio
         exchange = nil
         loop do
           exchange = fetcher.call(hop_for(destination, max_bytes:, on_overflow:, range:))
+          require_pinned_address!(exchange, destination)
           remember(exchange)
           break unless redirect?(exchange)
 
@@ -155,6 +156,12 @@ module RecordingStudio
           on_overflow: on_overflow,
           range: range
         }
+      end
+
+      def require_pinned_address!(exchange, destination)
+        return if exchange[:address].to_s == destination.address
+
+        raise UnsafeUrlError, "The URL is not allowed"
       end
 
       def remember(exchange)

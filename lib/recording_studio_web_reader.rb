@@ -19,6 +19,7 @@ require "recording_studio_web_reader/engine"
 module RecordingStudio
   module WebReader
     DEFAULT_NAMESPACE = :recording_studio_web_reader
+    PROBE_IMAGE_LIMIT = 10
 
     class << self
       def configuration
@@ -48,26 +49,8 @@ module RecordingStudio
       def probe_images(page)
         raise ConfigurationError, "A page is required" unless page.is_a?(Page)
 
-        seen = {}
-        images = page.images.map do |image|
-          next image if image[:width] && image[:height]
-
-          url = image[:url]
-          found = seen.fetch(url) do
-            seen[url] = probe_image(url)
-          rescue Error
-            seen[url] = nil
-          end
-          next image unless found && found[:width] && found[:height]
-
-          image.merge(
-            width: found[:width],
-            height: found[:height],
-            aspect_ratio: found[:aspect_ratio],
-            dimension_source: :image_probe
-          )
-        end
-        page.with(images: images)
+        state = { seen: {}, count: 0 }
+        page.with(images: page.images.map { |image| with_probe(image, state) })
       end
 
       def register_extractor(name, callable = nil, namespace: DEFAULT_NAMESPACE, override: false, &block)
@@ -99,6 +82,30 @@ module RecordingStudio
       end
 
       private
+
+      def with_probe(image, state)
+        return image if image[:width] && image[:height]
+
+        found = probed_size(image[:url], state)
+        return image unless found && found[:width] && found[:height]
+
+        image.merge(
+          width: found[:width],
+          height: found[:height],
+          aspect_ratio: found[:aspect_ratio],
+          dimension_source: :image_probe
+        )
+      end
+
+      def probed_size(url, state)
+        return state[:seen][url] if state[:seen].key?(url)
+        return if state[:count] >= PROBE_IMAGE_LIMIT
+
+        state[:count] += 1
+        state[:seen][url] = probe_image(url)
+      rescue Error
+        state[:seen][url] = nil
+      end
 
       def registry
         @registry ||= Registry.new.tap { |registry| registry.register_fetcher(:http, Http, override: true) }

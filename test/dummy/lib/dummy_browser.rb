@@ -29,7 +29,8 @@ class DummyBrowser
       headers: headers,
       body: body,
       content_type: content_type,
-      location: nil
+      location: nil,
+      address: @hop.fetch(:address)
     }
   end
 

@@ -153,7 +153,7 @@ Enrich a page without changing the original page.
 enriched = RecordingStudio::WebReader.probe_images(page)
 ```
 
-Images that already have both dimensions are left alone. One URL is fetched once. A failed probe leaves that image unchanged. The probe uses the HTTP fetcher, sends a byte range, and reads at most 64 KiB. PNG, GIF, JPEG, and WebP headers supply the size when the bytes are enough. The result uses `:image_probe`. An unrecognized body returns nil dimensions and does not raise.
+Images that already have both dimensions are left alone. One URL is fetched once. A failed probe leaves that image unchanged. `probe_images` stops after 10 fetches. The probe uses the HTTP fetcher, sends a byte range, and reads at most 64 KiB. PNG, GIF, JPEG, and WebP headers supply the size when the bytes are enough. The result uses `:image_probe`. An unrecognized body returns nil dimensions and does not raise.
 
 ## Register an extractor
 
@@ -238,7 +238,7 @@ The dummy app registers `:paywall` and asks Jev. The state is the status, title,
 
 This gem does not depend on Recording Studio AI. When that gem is already loaded, the engine registers a `visit_web_page` tool. The tool calls `RecordingStudio::WebReader.read`. It does not open its own HTTP path.
 
-The tool takes `url` and an optional `content` argument. `summary` is the default. It returns a short reading: text capped at 8,000 characters, 25 links, and 15 images. `full` returns the readable text, up to 200 links, and up to 50 images. Raw HTML stays out either way. The result stays within 200,000 bytes so it fits the Recording Studio AI tool limit. `text_truncated`, `link_count`, and `image_count` say what was left out. `challenge` is included. The Ruby page is still complete.
+The tool takes `url` and an optional `content` argument. `summary` is the default. It returns a short reading: text capped at 8,000 characters, 25 links, and 15 images. `full` returns the readable text, up to 200 links, and up to 50 images. Raw HTML stays out either way. If the result would pass 200,000 bytes, JSON-LD and other metadata go first, then links and images, then the text. `text_truncated`, `link_count`, and `image_count` say what was left out. `challenge` is included. The Ruby page is still complete.
 
 ## Instrumentation
 
@@ -295,7 +295,7 @@ RecordingStudio::WebReader.register_fetcher(:browser, MyGem::Browser)
 RecordingStudio::WebReader.read(url, strategy: :browser)
 ```
 
-The callable receives one hop. The hop includes `url`, `address`, `host`, `port`, `https`, timeouts, `max_bytes`, `user_agent`, and `on_overflow`. Return `status`, `headers`, `body`, `content_type`, and `location`. Do not follow redirects inside the fetcher. The reader does that, and it checks every target.
+The callable receives one hop. The hop includes `url`, `address`, `host`, `port`, `https`, timeouts, `max_bytes`, `user_agent`, and `on_overflow`. Connect to `address`. Return `status`, `headers`, `body`, `content_type`, `location`, and that same `address`. A missing or different address is refused. Do not follow redirects inside the fetcher. The reader does that, and it checks every target.
 
 ## Dummy app
 
