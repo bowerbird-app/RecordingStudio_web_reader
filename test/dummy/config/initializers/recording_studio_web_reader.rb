@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require Rails.root.join("lib/dummy_browser")
+
 RecordingStudio::WebReader.configure do |config|
   config.user_agent = "RecordingStudioWebReaderDummy/#{RecordingStudio::WebReader::VERSION}"
 end
@@ -22,3 +24,4 @@ module DummyPaywallAnalysis
 end
 
 RecordingStudio::WebReader.register_analysis(:paywall, DummyPaywallAnalysis, override: true)
+RecordingStudio::WebReader.register_fetcher(:browser, DummyBrowser, override: true)

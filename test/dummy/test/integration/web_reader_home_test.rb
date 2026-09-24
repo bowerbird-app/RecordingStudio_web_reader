@@ -21,6 +21,8 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Web reader"
     assert_includes response.body, "Fetch a public page and inspect the normalized result."
     assert_includes response.body, "Probe image dimensions"
+    assert_includes response.body, "Download the page"
+    assert_includes response.body, "Open in a browser"
   end
 
   test "an unsafe url is shown as an observation error" do
@@ -111,6 +113,29 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "This response is a JavaScript challenge."
     assert_includes response.body, "Enable JavaScript and cookies to continue"
     assert_includes response.body, "Just a moment..."
+  end
+
+  test "open in a browser uses the browser fetcher" do
+    RecordingStudio::WebReader.register_fetcher(:browser, lambda { |_hop|
+      {
+        status: 200,
+        headers: { "content-type" => "text/html" },
+        body: "<!doctype html><html><title>Browser article</title><body><article><p>Opened in the browser.</p></article></body></html>",
+        content_type: "text/html",
+        location: nil
+      }
+    }, override: true)
+
+    with_singleton_method(Resolv, :getaddresses, ->(*) { ["93.184.216.34"] }) do
+      get root_path, params: { url: "https://example.com/story", approach: "browser" }
+    end
+
+    assert_response :success
+    assert_includes response.body, "Browser article"
+    assert_includes response.body, "Opened in the browser."
+    assert_includes response.body, "Browser"
+  ensure
+    RecordingStudio::WebReader.register_fetcher(:browser, DummyBrowser, override: true)
   end
 
   private

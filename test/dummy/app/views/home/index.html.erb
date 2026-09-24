@@ -15,6 +15,16 @@
         value: params[:url],
         placeholder: "https://example.com/article"
       ) %>
+      <%= render FlatPack::RadioGroup::Component.new(
+        name: "approach",
+        label: "How should we open it?",
+        value: @approach,
+        help_text: "A browser runs JavaScript. A download does not.",
+        options: [
+          ["Download the page", "download"],
+          ["Open in a browser", "browser"]
+        ]
+      ) %>
       <%= render FlatPack::Checkbox::Component.new(
         name: "probe",
         checked: params[:probe] == "1",
@@ -54,6 +64,7 @@
         <% end %>
         <%= render FlatPack::List::Component.new(divider: true) do %>
           <% [
+            ["Opened with", @approach == "browser" ? "Browser" : "Download"],
             ["Requested URL", @page.url],
             ["Final URL", @page.final_url],
             ["Status", @page.status],
