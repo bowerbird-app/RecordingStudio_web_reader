@@ -1,0 +1,19 @@
+development:
+  user_agent: RecordingStudioWebReader
+  open_timeout: 5
+  read_timeout: 10
+  write_timeout: 5
+  max_redirects: 5
+  max_response_bytes: 2000000
+  fetch_strategy: http
+  instrumentation_enabled: true
+
+production:
+  user_agent: RecordingStudioWebReader
+  open_timeout: 5
+  read_timeout: 10
+  write_timeout: 5
+  max_redirects: 5
+  max_response_bytes: 2000000
+  fetch_strategy: http
+  instrumentation_enabled: true

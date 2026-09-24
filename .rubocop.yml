@@ -16,20 +16,43 @@ Style/StringLiterals:
 Layout/LineLength:
   Max: 120
 
-# Relax metrics for test files and generators
+Metrics/ParameterLists:
+  CountKeywordArgs: false
+
 Metrics/ClassLength:
+  Max: 220
   Exclude:
     - 'test/**/*'
+
+Metrics/ModuleLength:
+  Max: 250
 
 Metrics/MethodLength:
+  Max: 25
+  Exclude:
+    - 'test/**/*'
+    - 'lib/generators/**/*'
+    - 'db/migrate/**/*'
+
+Metrics/AbcSize:
+  Max: 35
   Exclude:
     - 'test/**/*'
     - 'lib/generators/**/*'
 
-Metrics/AbcSize:
+Metrics/CyclomaticComplexity:
+  Max: 12
   Exclude:
     - 'test/**/*'
-    - 'lib/generators/**/*'
+
+Metrics/PerceivedComplexity:
+  Max: 12
+  Exclude:
+    - 'test/**/*'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'test/**/*'
 
 # Allow empty blocks in tests (common for stubs/mocks)
 Lint/EmptyBlock:

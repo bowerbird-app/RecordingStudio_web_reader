@@ -90,9 +90,8 @@ class RenameVerificationTest < Minitest::Test
   end
 
   def test_controllers_directory_exists
-    controllers_dir = File.join(@root, "app", "controllers", @gem_name)
-    assert Dir.exist?(controllers_dir),
-           "Expected controllers directory at #{controllers_dir}"
+    assert Dir.exist?(controller_directory),
+           "Expected controllers directory at #{controller_directory}"
   end
 
   def test_views_directory_exists
@@ -114,8 +113,8 @@ class RenameVerificationTest < Minitest::Test
 
   def test_gemspec_references_correct_version_module
     content = read_gemspec
-    assert_match(/#{@pascal_name}::VERSION/, content,
-                 "Gemspec should reference #{@pascal_name}::VERSION")
+    assert_match(/#{Regexp.escape(version_constant)}/, content,
+                 "Gemspec should reference #{version_constant}")
   end
 
   def test_gemspec_requires_correct_version_file
@@ -129,9 +128,7 @@ class RenameVerificationTest < Minitest::Test
   # ============================================================
 
   def test_main_lib_defines_correct_module
-    content = read_main_lib
-    assert_match(/^module #{@pascal_name}$/, content,
-                 "Main lib should define module #{@pascal_name}")
+    assert_module_header(read_main_lib, "Main lib")
   end
 
   def test_main_lib_requires_version
@@ -151,9 +148,7 @@ class RenameVerificationTest < Minitest::Test
   # ============================================================
 
   def test_version_file_defines_correct_module
-    content = read_version_file
-    assert_match(/^module #{@pascal_name}$/, content,
-                 "Version file should define module #{@pascal_name}")
+    assert_module_header(read_version_file, "Version file")
   end
 
   def test_version_file_has_version_constant
@@ -167,15 +162,13 @@ class RenameVerificationTest < Minitest::Test
   # ============================================================
 
   def test_engine_file_defines_correct_module
-    content = read_engine_file
-    assert_match(/^module #{@pascal_name}$/, content,
-                 "Engine file should define module #{@pascal_name}")
+    assert_module_header(read_engine_file, "Engine file")
   end
 
   def test_engine_isolates_correct_namespace
     content = read_engine_file
-    assert_match(/isolate_namespace\s+#{@pascal_name}/, content,
-                 "Engine should isolate_namespace #{@pascal_name}")
+    assert_match(/isolate_namespace\s+#{Regexp.escape(namespace_constant)}/, content,
+                 "Engine should isolate_namespace #{namespace_constant}")
   end
 
   # ============================================================
@@ -184,8 +177,8 @@ class RenameVerificationTest < Minitest::Test
 
   def test_routes_references_correct_engine
     content = read_routes_file
-    assert_match(/#{@pascal_name}::Engine\.routes\.draw/, content,
-                 "Routes should reference #{@pascal_name}::Engine")
+    assert_match(/#{Regexp.escape(namespace_constant)}::Engine\.routes\.draw/, content,
+                 "Routes should reference #{namespace_constant}::Engine")
   end
 
   # ============================================================
@@ -193,29 +186,25 @@ class RenameVerificationTest < Minitest::Test
   # ============================================================
 
   def test_application_controller_exists
-    path = File.join(@root, "app", "controllers", @gem_name, "application_controller.rb")
+    path = File.join(controller_directory, "application_controller.rb")
     assert File.exist?(path),
            "Application controller should exist at #{path}"
   end
 
   def test_application_controller_has_correct_module
-    path = File.join(@root, "app", "controllers", @gem_name, "application_controller.rb")
-    content = File.read(path)
-    assert_match(/^module #{@pascal_name}$/, content,
-                 "Application controller should be in module #{@pascal_name}")
+    path = File.join(controller_directory, "application_controller.rb")
+    assert_module_header(File.read(path), "Application controller")
   end
 
   def test_home_controller_exists
-    path = File.join(@root, "app", "controllers", @gem_name, "home_controller.rb")
+    path = File.join(controller_directory, "home_controller.rb")
     assert File.exist?(path),
            "Home controller should exist at #{path}"
   end
 
   def test_home_controller_has_correct_module
-    path = File.join(@root, "app", "controllers", @gem_name, "home_controller.rb")
-    content = File.read(path)
-    assert_match(/^module #{@pascal_name}$/, content,
-                 "Home controller should be in module #{@pascal_name}")
+    path = File.join(controller_directory, "home_controller.rb")
+    assert_module_header(File.read(path), "Home controller")
   end
 
   # ============================================================
@@ -231,7 +220,7 @@ class RenameVerificationTest < Minitest::Test
 
     ruby_files = Dir.glob(File.join(@root, "**", "*.rb"))
     # Exclude test files and this verification test itself
-    ruby_files.reject! { |f| f.include?("test/dummy") || f.include?("rename_verification_test.rb") }
+    ruby_files.reject! { |f| f.include?("/test/") }
 
     files_with_old_refs = []
 
@@ -321,8 +310,8 @@ class RenameVerificationTest < Minitest::Test
 
     begin
       require "#{@gem_name}/version"
-      mod = Object.const_get(@pascal_name)
-      assert_kind_of Module, mod, "#{@pascal_name} should be a module"
+      mod = module_constant
+      assert_kind_of Module, mod, "#{namespace_constant} should be a module"
     rescue LoadError => e
       flunk "Could not load version file: #{e.message}"
     rescue NameError => e
@@ -335,8 +324,8 @@ class RenameVerificationTest < Minitest::Test
 
     begin
       require "#{@gem_name}/version"
-      mod = Object.const_get(@pascal_name)
-      refute_nil mod::VERSION, "#{@pascal_name}::VERSION should be defined"
+      mod = module_constant
+      refute_nil mod::VERSION, "#{namespace_constant}::VERSION should be defined"
     rescue LoadError, NameError => e
       flunk "Could not access VERSION: #{e.message}"
     end
@@ -349,9 +338,9 @@ class RenameVerificationTest < Minitest::Test
 
     begin
       require @gem_name
-      mod = Object.const_get(@pascal_name)
-      assert_kind_of Module, mod, "#{@pascal_name} should be a module"
-      assert_kind_of Class, mod::Engine, "#{@pascal_name}::Engine should be a class"
+      mod = module_constant
+      assert_kind_of Module, mod, "#{namespace_constant} should be a module"
+      assert_kind_of Class, mod::Engine, "#{namespace_constant}::Engine should be a class"
     rescue LoadError => e
       flunk "Could not load gem: #{e.message}"
     rescue NameError => e
@@ -380,8 +369,7 @@ class RenameVerificationTest < Minitest::Test
     skip unless File.exist?(generator_path)
 
     content = File.read(generator_path)
-    assert_match(/^module #{@pascal_name}$/, content,
-                 "Install generator should be in module #{@pascal_name}")
+    assert_module_header(content, "Install generator")
   end
 
   # ============================================================
@@ -408,6 +396,39 @@ class RenameVerificationTest < Minitest::Test
     return File.basename(lib_dirs.first) if lib_dirs.any?
 
     raise "Could not detect gem name"
+  end
+
+  def nested_reader?
+    @gem_name == "recording_studio_web_reader"
+  end
+
+  def namespace_constant
+    nested_reader? ? "RecordingStudio::WebReader" : @pascal_name
+  end
+
+  def version_constant
+    "#{namespace_constant}::VERSION"
+  end
+
+  def module_constant
+    nested_reader? ? RecordingStudio::WebReader : Object.const_get(@pascal_name)
+  end
+
+  def controller_directory
+    if nested_reader?
+      File.join(@root, "app", "controllers", "recording_studio", "web_reader")
+    else
+      File.join(@root, "app", "controllers", @gem_name)
+    end
+  end
+
+  def assert_module_header(content, label)
+    if nested_reader?
+      assert_match(/^module RecordingStudio$/, content, "#{label} should open module RecordingStudio")
+      assert_match(/^  module WebReader$/, content, "#{label} should open module WebReader")
+    else
+      assert_match(/^module #{@pascal_name}$/, content, "#{label} should define module #{@pascal_name}")
+    end
   end
 
   def to_pascal_case(str)
