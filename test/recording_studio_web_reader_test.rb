@@ -106,6 +106,7 @@ class RecordingStudioWebReaderTest < Minitest::Test
     tailwind_source = File.read(File.expand_path("dummy/app/assets/tailwind/application.css", __dir__))
 
     assert_includes tailwind_source, "../../../vendor/bundle/**/flatpack/app/components/**/*.{rb,erb}"
+    assert_includes tailwind_source, "bundler/gems/flatpack-*/app/components/**/*.{rb,erb}"
     assert_includes tailwind_source, "flatpack-*/app/components/**/*.{rb,erb}"
     assert_includes tailwind_source, "../../../vendor/bundle/**/recording_studio/app/views/**/*.erb"
     assert_includes tailwind_source, "recordingstudio-*/app/views/**/*.erb"
