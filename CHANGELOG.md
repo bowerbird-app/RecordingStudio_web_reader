@@ -16,3 +16,4 @@
 - A dummy page that inspects a fetched page.
 - `page.challenge` records a JavaScript interstitial without retrying the fetch.
 - The dummy page can open a URL in Chrome when you choose **Open in a browser**.
+- The dummy page asks Jev whether a paywall holds the writing back.

@@ -191,13 +191,8 @@ Put this in the gem that owns the decision, not in Web Reader.
 module Coverage
   class PaywallAnalysis
     def self.call(page, root_recording:, initiator:, **)
-      observations = {
-        "http_status" => page.status,
-        "body_chars" => page.text.to_s.length
-      }
-
       response = RecordingStudioAI.decide(
-        state: observations.to_json,
+        state: "Status: #{page.status}\nTitle: #{page.title}\n\nVisible text:\n#{page.text}",
         questions: {
           access: {
             type: :choice,
@@ -237,7 +232,7 @@ RecordingStudio::WebReader.register_analysis(:paywall, Coverage::PaywallAnalysis
 
 `page.analyze(:paywall, root_recording: recording, initiator: user)` runs it. Web Reader does not call `decide` and does not depend on `recording_studio_ai`. If that gem is absent, register a Ruby callable instead.
 
-The dummy app registers a local `:paywall` analysis that looks only at text length. That registration is dummy code. It is there to show the contract.
+The dummy app registers `:paywall` and asks Jev. The state is the status, title, challenge mark, and visible text. A short page is not treated as a paywall. Web Reader still does not call `decide`.
 
 ## Recording Studio AI
 
@@ -304,6 +299,6 @@ The callable receives one hop. The hop includes `url`, `address`, `host`, `port`
 
 ## Dummy app
 
-The dummy app is a signed-in developer page. Enter a URL and inspect the final URL, status, title, description, text, metadata, links, images, dimensions, and variants. Choose **Download the page** or **Open in a browser**. The browser choice needs Chrome on the machine, runs JavaScript, and returns the rendered page. Check **Probe image dimensions** to run `probe_images`. The page also shows the dummy paywall analysis.
+The dummy app is a signed-in developer page. Enter a URL and inspect the final URL, status, title, description, text, metadata, links, images, dimensions, and variants. Choose **Download the page** or **Open in a browser**. The browser choice needs Chrome on the machine, runs JavaScript, and returns the rendered page. Check **Probe image dimensions** to run `probe_images`. The page asks Jev whether a paywall holds the writing back. That call needs `TYPESAFE_API_KEY`.
 
 The dummy Gemfile pins Recording Studio `v4.2.0`, FlatPack `v0.1.177`, and Accessible `v0.9.1`. Sign in at `/users/sign_in` with `admin@admin.com` and `Password`.
