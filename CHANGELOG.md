@@ -10,7 +10,7 @@
 - Title, description, canonical URL, Open Graph, Twitter, JSON-LD, main text, links, and images.
 - Optional image dimension probe for PNG, GIF, JPEG, and WebP headers.
 - Extractor and analysis registries with namespaces, evidence, and duplicate protection.
-- Optional `visit_web_page` tool when Recording Studio AI is already loaded.
+- Optional `visit_web_page` tool when Recording Studio AI is already loaded. Pass `content` `full` for the readable text.
 - `read.recording_studio_web_reader` and `probe_image.recording_studio_web_reader` notifications.
 - An explicit caller-supplied cache.
 - A dummy page that inspects a fetched page.

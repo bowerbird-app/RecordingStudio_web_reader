@@ -826,6 +826,7 @@ class WebReaderBehaviorTest < Minitest::Test
     projected = RecordingStudio::WebReader::AiTool.project(page)
     refute projected.key?("html")
     assert_nil projected["challenge"]
+    assert_equal "summary", projected["content"]
     assert_equal true, projected["text_truncated"]
     assert_equal 8_000, projected["text"].length
     assert_equal 30, projected["link_count"]
@@ -833,6 +834,19 @@ class WebReaderBehaviorTest < Minitest::Test
     assert_equal 20, projected["image_count"]
     assert_equal 15, projected["images"].length
     refute_includes JSON.generate(projected), "SECRET-HTML"
+
+    full = RecordingStudio::WebReader::AiTool.project(page, content: "full")
+    assert_equal "full", full["content"]
+    assert_equal false, full["text_truncated"]
+    assert_equal 9_000, full["text"].length
+    assert_equal 30, full["links"].length
+    assert_equal 20, full["images"].length
+    refute full.key?("html")
+    refute_includes JSON.generate(full), "SECRET-HTML"
+
+    fitted = RecordingStudio::WebReader::AiTool.project(page.with(text: "y" * 250_000), content: "full")
+    assert_equal true, fitted["text_truncated"]
+    assert_operator JSON.generate(fitted).bytesize, :<=, RecordingStudio::WebReader::AiTool::RESULT_BYTE_BUDGET
 
     tools = ToolRegistry.new
     unless defined?(::RecordingStudioAI)
@@ -842,7 +856,10 @@ class WebReaderBehaviorTest < Minitest::Test
     RecordingStudioAI.define_singleton_method(:tools) { tools }
     RecordingStudio::WebReader::AiTool.register!
     assert_equal :visit_web_page, tools.kwargs[:key]
-    assert_equal 1, tools.kwargs[:version]
+    assert_equal 2, tools.kwargs[:version]
+    content = tools.kwargs[:parameters].find { |parameter| parameter[:name] == :content }
+    assert_equal "summary", content[:default]
+    assert_equal %w[summary full], content[:allowed_values]
     assert_equal true, tools.kwargs[:override]
     assert_equal true, tools.kwargs[:read_only]
     assert_equal true, tools.kwargs[:idempotent]

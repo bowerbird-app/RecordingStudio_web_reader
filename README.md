@@ -238,7 +238,7 @@ The dummy app registers `:paywall` and asks Jev. The state is the status, title,
 
 This gem does not depend on Recording Studio AI. When that gem is already loaded, the engine registers a `visit_web_page` tool. The tool calls `RecordingStudio::WebReader.read`. It does not open its own HTTP path.
 
-The tool result omits raw HTML and includes `challenge`. Text is capped at 8,000 characters. Links are capped at 25 and images at 15. `text_truncated`, `link_count`, and `image_count` say what was left out. The Ruby page is still complete.
+The tool takes `url` and an optional `content` argument. `summary` is the default. It returns a short reading: text capped at 8,000 characters, 25 links, and 15 images. `full` returns the readable text, up to 200 links, and up to 50 images. Raw HTML stays out either way. The result stays within 200,000 bytes so it fits the Recording Studio AI tool limit. `text_truncated`, `link_count`, and `image_count` say what was left out. `challenge` is included. The Ruby page is still complete.
 
 ## Instrumentation
 
