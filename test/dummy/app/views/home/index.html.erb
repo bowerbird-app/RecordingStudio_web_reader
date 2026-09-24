@@ -1,101 +1,138 @@
-<% dummy_page_nav(title: "Template Demo", back_url: root_path) %>
+<% dummy_page_nav(title: "Web reader", back_url: root_path) %>
 
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
-    title: "Template Demo",
-    subtitle: "This dummy app is the browser-facing demo surface for the template.",
+    title: "Web reader",
+    subtitle: "Fetch a public page and inspect the normalized result.",
     variant: :h1
   ) %>
 
-  <div class="grid gap-6 lg:grid-cols-2">
+  <%= form_with url: root_path, method: :get do %>
+    <div class="flex flex-col gap-4">
+      <%= render FlatPack::TextInput::Component.new(
+        name: "url",
+        label: "URL",
+        value: params[:url],
+        placeholder: "https://example.com/article"
+      ) %>
+      <%= render FlatPack::Checkbox::Component.new(
+        name: "probe",
+        checked: params[:probe] == "1",
+        label: "Probe image dimensions"
+      ) %>
+      <%= render FlatPack::Button::Component.new(
+        text: "Read page",
+        style: :primary,
+        type: :submit
+      ) %>
+    </div>
+  <% end %>
+
+  <% if @error %>
+    <%= render FlatPack::Alert::Component.new(
+      style: :danger,
+      description: @error.message
+    ) %>
+  <% end %>
+
+  <% if @page %>
     <%= render FlatPack::Card::Component.new(style: :default) do |card| %>
       <% card.header do %>
         <%= render FlatPack::PageTitle::Component.new(
-          title: "What's working",
-          subtitle: "Core template capabilities already wired into the dummy app.",
+          title: @page.title.presence || "Untitled page",
+          subtitle: @page.final_url,
           variant: :h3,
           class: "mb-0 pb-0"
         ) %>
       <% end %>
-
       <% card.body do %>
-        <ul class="space-y-3 text-sm leading-6">
-          <li>Rails engine routes are mounted and responding.</li>
-          <li>PostgreSQL UUID-oriented migrations are included in the engine.</li>
-          <li>Tailwind sources can be wired into a host app through the install generator.</li>
-          <li>The dummy app exercises authentication, the Recording Studio default layout, and FlatPack.</li>
-        </ul>
+        <dl class="grid gap-2 text-sm">
+          <div><dt class="font-semibold">Requested URL</dt><dd><%= @page.url %></dd></div>
+          <div><dt class="font-semibold">Final URL</dt><dd><%= @page.final_url %></dd></div>
+          <div><dt class="font-semibold">Status</dt><dd><%= @page.status %></dd></div>
+          <div><dt class="font-semibold">Content type</dt><dd><%= @page.content_type %></dd></div>
+          <div><dt class="font-semibold">Description</dt><dd><%= @page.description %></dd></div>
+          <div><dt class="font-semibold">Canonical URL</dt><dd><%= @page.canonical_url %></dd></div>
+        </dl>
       <% end %>
     <% end %>
 
     <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
       <% card.header do %>
-        <%= render FlatPack::PageTitle::Component.new(
-          title: "Next steps",
-          subtitle: "The usual first moves when turning the template into a real addon.",
-          variant: :h3,
-          class: "mb-0 pb-0"
-        ) %>
+        <%= render FlatPack::PageTitle::Component.new(title: "Text", variant: :h3, class: "mb-0 pb-0") %>
       <% end %>
-
       <% card.body do %>
-        <ol class="space-y-3 text-sm leading-6 list-decimal pl-5">
-          <li>Run <code>bin/rename_gem your_addon_name</code> when you are ready to rename the engine.</li>
-          <li>Replace the sample migration with your addon tables and install them into the host app.</li>
-          <li>Configure Recording Studio recordable types and capabilities in the host app initializer.</li>
-          <li>Use the dummy app to validate layout, asset scanning, and authentication flows.</li>
-        </ol>
+        <%= render FlatPack::CodeBlock::Component.new(
+          code: @page.text.to_s[0, 8_000],
+          language: :text,
+          title: "Main text",
+          wrap: true
+        ) %>
       <% end %>
     <% end %>
 
     <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
       <% card.header do %>
-        <%= render FlatPack::PageTitle::Component.new(
-          title: "FlatPack usage",
-          subtitle: "This page uses FlatPack components for its primary UI structure.",
-          variant: :h3,
-          class: "mb-0 pb-0"
+        <%= render FlatPack::PageTitle::Component.new(title: "Metadata", variant: :h3, class: "mb-0 pb-0") %>
+      <% end %>
+      <% card.body do %>
+        <%= render FlatPack::CodeBlock::Component.new(
+          code: JSON.pretty_generate(@page.metadata.to_h),
+          language: :json,
+          title: "Metadata",
+          wrap: true
         ) %>
       <% end %>
+    <% end %>
 
-      <% card.body do %>
-        <p class="text-sm leading-6 text-(--surface-content-color)">
-          Use FlatPack cards, buttons, badges, inputs, and layout primitives as the default path for addon UI. Keep raw HTML for simple semantic content only.
-        </p>
+    <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+      <% card.header do %>
+        <%= render FlatPack::PageTitle::Component.new(title: "Links", variant: :h3, class: "mb-0 pb-0") %>
       <% end %>
+      <% card.body do %>
+        <%= render FlatPack::Table::Component.new(data: @page.links, class: "text-sm") do |table| %>
+          <% table.column(title: "URL") { |link| link[:url] } %>
+          <% table.column(title: "Text") { |link| link[:text] } %>
+          <% table.column(title: "Rel") { |link| Array(link[:rel]).join(" ") } %>
+        <% end %>
+      <% end %>
+    <% end %>
 
-      <% card.footer do %>
-        <a href="https://github.com/bowerbird-app/flatpack"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="inline-flex">
-          <%= render FlatPack::Button::Component.new(
-            text: "View FlatPack documentation",
-            style: :primary,
-            size: :md
+    <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+      <% card.header do %>
+        <%= render FlatPack::PageTitle::Component.new(title: "Images", variant: :h3, class: "mb-0 pb-0") %>
+      <% end %>
+      <% card.body do %>
+        <%= render FlatPack::Table::Component.new(data: @page.images, min_width: :lg, class: "text-sm") do |table| %>
+          <% table.column(title: "URL") { |image| image[:url] } %>
+          <% table.column(title: "Alt") { |image| image[:alt] } %>
+          <% table.column(title: "Width") { |image| image[:width] } %>
+          <% table.column(title: "Height") { |image| image[:height] } %>
+          <% table.column(title: "Source") { |image| image[:dimension_source] } %>
+          <% table.column(title: "Variants") { |image| Array(image[:variants]).map { |variant| [variant[:width_hint], variant[:url]].compact.join(" ") }.join(", ") } %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <% if @paywall %>
+      <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+        <% card.header do %>
+          <%= render FlatPack::PageTitle::Component.new(
+            title: "Dummy paywall analysis",
+            subtitle: "Registered by the dummy app. It is not a product classifier.",
+            variant: :h3,
+            class: "mb-0 pb-0"
           ) %>
-        </a>
+        <% end %>
+        <% card.body do %>
+          <%= render FlatPack::CodeBlock::Component.new(
+            code: JSON.pretty_generate(@paywall.to_h),
+            language: :json,
+            title: "Analysis",
+            wrap: true
+          ) %>
+        <% end %>
       <% end %>
     <% end %>
-
-    <%= render FlatPack::Card::Component.new(style: :default) do |card| %>
-      <% card.header do %>
-        <%= render FlatPack::PageTitle::Component.new(
-          title: "Install flow",
-          subtitle: "What the host app generator path covers.",
-          variant: :h3,
-          class: "mb-0 pb-0"
-        ) %>
-      <% end %>
-
-      <% card.body do %>
-        <ul class="space-y-3 text-sm leading-6">
-          <li>Add the gem to your host app and run <code>bundle install</code>.</li>
-          <li>Run <code>rails generate gem_template:install</code> to mount the engine and add configuration.</li>
-          <li>Run <code>rails generate gem_template:migrations</code> to copy engine migrations into the host app.</li>
-          <li>Rebuild Tailwind if needed with <code>bin/rails tailwindcss:build</code>.</li>
-        </ul>
-      <% end %>
-    <% end %>
-  </div>
+  <% end %>
 </div>
