@@ -85,6 +85,7 @@ module RecordingStudio
         copy.css("[hidden], [aria-hidden='true']").remove
         node = copy.at_css("article") || copy.at_css("main") || copy.at_css("[role='main']") || copy.at_css("body")
         text = squish(node&.text)
+        text = doc.css("noscript").map { |tag| squish(tag.text) }.reject(&:empty?).join(" ") if text.empty?
         text.empty? ? nil : text
       end
 

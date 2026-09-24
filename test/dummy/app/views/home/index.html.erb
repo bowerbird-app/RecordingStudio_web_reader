@@ -68,12 +68,19 @@
         <%= render FlatPack::PageTitle::Component.new(title: "Text", variant: :h3, class: "mb-0 pb-0") %>
       <% end %>
       <% card.body do %>
-        <%= render FlatPack::CodeBlock::Component.new(
-          code: @page.text.to_s[0, 8_000],
-          language: :text,
-          title: "Main text",
-          wrap: true
-        ) %>
+        <% if @page.text.present? %>
+          <%= render FlatPack::CodeBlock::Component.new(
+            code: @page.text.to_s[0, 8_000],
+            language: :text,
+            title: "Main text",
+            wrap: true
+          ) %>
+        <% else %>
+          <%= render FlatPack::EmptyState::Component.new(
+            title: "No visible text",
+            description: "This page did not include readable text."
+          ) %>
+        <% end %>
       <% end %>
     <% end %>
 

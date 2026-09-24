@@ -200,6 +200,25 @@ class WebReaderBehaviorTest < Minitest::Test
     end
   end
 
+  def test_read_keeps_noscript_text_when_the_page_has_no_other_text
+    html = <<~HTML
+      <html><body><div role="main"><noscript>Enable JavaScript and cookies to continue</noscript></div></body></html>
+    HTML
+    page, = read_page("https://example.com/challenge", [html_response(html, status: 403)])
+
+    assert_equal 403, page.status
+    assert_equal "Enable JavaScript and cookies to continue", page.text
+  end
+
+  def test_read_skips_noscript_when_visible_text_exists
+    html = <<~HTML
+      <html><body><article><p>Visible story</p></article><noscript>Enable JavaScript</noscript></body></html>
+    HTML
+    page, = read_page("https://example.com/story", [html_response(html)])
+
+    assert_equal "Visible story", page.text
+  end
+
   def test_non_html_response_raises_with_status
     response = Response.new(
       code: 404,
