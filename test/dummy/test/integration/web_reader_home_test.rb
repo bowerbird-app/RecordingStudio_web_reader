@@ -12,6 +12,13 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
       user.password_confirmation = "Password"
     end
     sign_in @user
+    Current.actor = @user
+    Workspace.find_or_create_by!(name: "Studio Workspace")
+    Workspace.order(:name).each do |workspace|
+      grant_reader_access(RecordingStudio.root_recording_for(workspace))
+    end
+  ensure
+    Current.actor = nil
   end
 
   test "home page renders the reader form" do
@@ -74,9 +81,12 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
     client.define_singleton_method(:max_retries=) { |_value| nil }
     client.define_singleton_method(:request) { |_req, &block| block.call(response_body) }
 
-    with_singleton_method(Resolv, :getaddresses, ->(*) { ["93.184.216.34"] }) do
-      with_singleton_method(Net::HTTP, :new, ->(*) { client }) do
-        get root_path, params: { url: "https://example.com/story" }
+    captured = nil
+    with_paywall(choice: :open, capture: ->(kwargs) { captured = kwargs }) do
+      with_singleton_method(Resolv, :getaddresses, ->(*) { [ "93.184.216.34" ] }) do
+        with_singleton_method(Net::HTTP, :new, ->(*) { client }) do
+          get root_path, params: { url: "https://example.com/story" }
+        end
       end
     end
 
@@ -88,8 +98,28 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "https://example.com/about"
     assert_includes response.body, "https://example.com/photo.jpg"
     assert_includes response.body, "html_attribute"
-    assert_includes response.body, "Dummy paywall analysis"
+    assert_includes response.body, "No paywall"
+    assert_includes response.body, "Jev read the visible text."
+    assert_includes captured[:state], "Hello from the stub."
+    assert_equal "page_paywall", captured[:purpose]
+    refute_includes captured[:state], "<article>"
+    refute_includes response.body, "Dummy paywall analysis"
     refute_includes response.body, "This response is a JavaScript challenge."
+  end
+
+  test "a read without a typesafe key says jev is not configured" do
+    skip "This machine has a TypeSafe key" if ENV["TYPESAFE_API_KEY"].present?
+
+    client = html_client("<html><title>Open article</title><body><article><p>The full story is here.</p></article></body></html>", status: 200)
+    with_singleton_method(Resolv, :getaddresses, ->(*) { [ "93.184.216.34" ] }) do
+      with_singleton_method(Net::HTTP, :new, ->(*) { client }) do
+        get root_path, params: { url: "https://example.com/open" }
+      end
+    end
+
+    assert_response :success
+    assert_includes response.body, "The full story is here."
+    assert_includes response.body, "Jev is not configured. Set TYPESAFE_API_KEY."
   end
 
   test "a javascript interstitial shows a challenge alert" do
@@ -103,9 +133,11 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
       </html>
     HTML
     client = html_client(html, status: 403)
-    with_singleton_method(Resolv, :getaddresses, ->(*) { ["93.184.216.34"] }) do
-      with_singleton_method(Net::HTTP, :new, ->(*) { client }) do
-        get root_path, params: { url: "https://example.com/challenge" }
+    with_paywall(choice: :blocked) do
+      with_singleton_method(Resolv, :getaddresses, ->(*) { [ "93.184.216.34" ] }) do
+        with_singleton_method(Net::HTTP, :new, ->(*) { client }) do
+          get root_path, params: { url: "https://example.com/challenge" }
+        end
       end
     end
 
@@ -116,18 +148,21 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
   end
 
   test "open in a browser uses the browser fetcher" do
-    RecordingStudio::WebReader.register_fetcher(:browser, lambda { |_hop|
+    RecordingStudio::WebReader.register_fetcher(:browser, lambda { |hop|
       {
         status: 200,
         headers: { "content-type" => "text/html" },
         body: "<!doctype html><html><title>Browser article</title><body><article><p>Opened in the browser.</p></article></body></html>",
         content_type: "text/html",
-        location: nil
+        location: nil,
+        address: hop[:address]
       }
     }, override: true)
 
-    with_singleton_method(Resolv, :getaddresses, ->(*) { ["93.184.216.34"] }) do
-      get root_path, params: { url: "https://example.com/story", approach: "browser" }
+    with_paywall(choice: :open) do
+      with_singleton_method(Resolv, :getaddresses, ->(*) { [ "93.184.216.34" ] }) do
+        get root_path, params: { url: "https://example.com/story", approach: "browser" }
+      end
     end
 
     assert_response :success
@@ -139,6 +174,19 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def grant_reader_access(root)
+    return if RecordingStudioAccessible.authorized?(actor: @user, recording: root, role: :edit)
+
+    result = RecordingStudioAccessible.bootstrap_owner_access!(recording: root, actor: @user)
+    return if result.success?
+
+    admin = User.find_by(email: "admin@admin.com")
+    return if admin.nil?
+
+    Current.actor = admin
+    RecordingStudioAccessible.grant_access(recording: root, actor: @user, role: :edit, manager_actor: admin)
+  end
 
   def html_client(html, status:)
     response_body = Struct.new(:code, :headers, :body, keyword_init: true) do
@@ -158,12 +206,24 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
     client
   end
 
+  def with_paywall(choice:, capture: nil)
+    answer = Struct.new(:choice, :confidence, :probabilities).new(choice, 0.91, { choice.to_s => 0.91 })
+    response = Struct.new(:answers).new({ paywall: answer })
+    implementation = lambda { |**kwargs|
+      capture&.call(kwargs)
+      response
+    }
+    with_singleton_method(RecordingStudioAI, :decide!, implementation) do
+      yield
+    end
+  end
+
   def with_singleton_method(object, name, implementation)
     singleton = object.singleton_class
     original = object.method(name)
     singleton.define_method(name, &implementation)
     yield
   ensure
-    singleton.define_method(name) { |*args, &block| original.call(*args, &block) }
+    singleton.define_method(name) { |*args, **kwargs, &block| original.call(*args, **kwargs, &block) }
   end
 end

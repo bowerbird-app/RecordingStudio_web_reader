@@ -77,7 +77,8 @@ module RecordingStudio
           headers: headers,
           body: body,
           content_type: headers["content-type"],
-          location: headers["location"]
+          location: headers["location"],
+          address: @hop.fetch(:address)
         }
       end
     end

@@ -144,23 +144,31 @@
       <% end %>
     <% end %>
 
-    <% if @paywall %>
+    <% if @paywall_error %>
+      <%= render FlatPack::Alert::Component.new(
+        style: :danger,
+        title: "Paywall",
+        description: @paywall_error
+      ) %>
+    <% elsif @paywall %>
       <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
         <% card.header do %>
           <%= render FlatPack::PageTitle::Component.new(
-            title: "Dummy paywall analysis",
-            subtitle: "Registered by the dummy app. It is not a product classifier.",
+            title: "Paywall",
+            subtitle: "Jev read the visible text.",
             variant: :h3,
             class: "mb-0 pb-0"
           ) %>
         <% end %>
         <% card.body do %>
-          <%= render FlatPack::CodeBlock::Component.new(
-            code: JSON.pretty_generate(@paywall.to_h),
-            language: :json,
-            title: "Analysis",
-            wrap: true
-          ) %>
+          <%= render FlatPack::List::Component.new(divider: true) do %>
+            <%= render FlatPack::List::Item.new(leading: "Decision") do %>
+              <%= PaywallDecision.label(@paywall.value) %>
+            <% end %>
+            <%= render FlatPack::List::Item.new(leading: "Confidence") do %>
+              <%= number_to_percentage(@paywall.confidence.to_f * 100, precision: 0) %>
+            <% end %>
+          <% end %>
         <% end %>
       <% end %>
     <% end %>

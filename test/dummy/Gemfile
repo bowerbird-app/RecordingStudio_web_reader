@@ -8,6 +8,7 @@ gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_access
 
 # Root switcher for the top nav
 gem "recording_studio_root_switchable", github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.0"
+gem "recording_studio_ai", github: "bowerbird-app/RecordingStudio_AI", tag: "v0.4.0"
 
 # Devise authentication
 gem "devise"
