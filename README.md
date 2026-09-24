@@ -299,6 +299,6 @@ The callable receives one hop. The hop includes `url`, `address`, `host`, `port`
 
 ## Dummy app
 
-The dummy app is a signed-in developer page. Enter a URL and inspect the final URL, status, title, description, text, metadata, links, images, dimensions, and variants. Choose **Download the page** or **Open in a browser**. The browser choice needs Chrome on the machine, runs JavaScript, and returns the rendered page. Check **Probe image dimensions** to run `probe_images`. The page asks Jev whether a paywall holds the writing back. That call needs `TYPESAFE_API_KEY`.
+The dummy app is a signed-in developer page. Enter a URL and inspect the final URL, status, title, description, text, metadata, links, images, dimensions, and variants. Choose **Download the page** or **Open in a browser**. The browser choice needs Chrome on the machine, runs JavaScript, and returns the rendered page. Check **Probe image dimensions** to run `probe_images`. The page asks Jev whether a paywall holds the writing back. That call needs `TYPESAFE_API_KEY`, or `typesafe` when that is the name of the key in the environment.
 
 The dummy Gemfile pins Recording Studio `v4.2.0`, FlatPack `v0.1.177`, and Accessible `v0.9.1`. Sign in at `/users/sign_in` with `admin@admin.com` and `Password`.

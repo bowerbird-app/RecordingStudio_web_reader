@@ -108,7 +108,8 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
   end
 
   test "a read without a typesafe key says jev is not configured" do
-    skip "This machine has a TypeSafe key" if ENV["TYPESAFE_API_KEY"].present?
+    previous_key = RecordingStudioAI.configuration.typesafe_api_key
+    RecordingStudioAI.configuration.typesafe_api_key = nil
 
     client = html_client("<html><title>Open article</title><body><article><p>The full story is here.</p></article></body></html>", status: 200)
     with_singleton_method(Resolv, :getaddresses, ->(*) { [ "93.184.216.34" ] }) do
@@ -120,6 +121,8 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "The full story is here."
     assert_includes response.body, "Jev is not configured. Set TYPESAFE_API_KEY."
+  ensure
+    RecordingStudioAI.configuration.typesafe_api_key = previous_key
   end
 
   test "a javascript interstitial shows a challenge alert" do
