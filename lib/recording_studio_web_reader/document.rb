@@ -3,6 +3,7 @@
 require "json"
 require "nokogiri"
 require "uri"
+require_relative "embedded_video"
 
 module RecordingStudio
   module WebReader
@@ -40,16 +41,17 @@ module RecordingStudio
         doc = parse_html(body)
         base = final_url
         images = collect_images(doc, base)
+        embedded = EmbeddedVideo.from(doc)
         Page.new(
           url: url,
           final_url: final_url,
           status: exchange.fetch(:status),
           headers: public_headers(exchange.fetch(:headers)),
           content_type: media_type(exchange[:content_type]).then { |type| type.empty? ? "text/html" : type },
-          title: title_for(doc),
-          description: description_for(doc),
+          title: EmbeddedVideo.title(title_for(doc), embedded),
+          description: EmbeddedVideo.description(description_for(doc), embedded),
           canonical_url: canonical_for(doc, base),
-          text: text_for(doc),
+          text: EmbeddedVideo.text(text_for(doc), embedded),
           html: body,
           metadata: metadata_for(doc),
           links: links_for(doc, base),
@@ -76,7 +78,9 @@ module RecordingStudio
       end
 
       def canonical_for(doc, base)
-        href = doc.at_css("link[rel~='canonical']")&.[]("href")
+        href = doc.at_css("link[rel~='canonical']")&.[]("href").to_s.strip
+        return if href.empty? || !href.match?(%r{\A(?:https?://|/|\?|\./|\.\./)}i)
+
         absolute_http(href, base)
       end
 

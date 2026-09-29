@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.1] - 2026-09-29
+
+### Fixed
+
+- A page whose visible title is only the site name now uses the title and description embedded in that page's player JSON. Those words are placed ahead of the remaining visible text.
+- A canonical href that is not a URL, such as `undefined`, stays nil.
+
+### Upgrade
+
+- Existing page attributes are unchanged. `read` still defaults to `:http` and does not treat this page as a JavaScript challenge.
+- `page.canonical_url` is nil when the canonical href is not an absolute HTTP(S) URL or a relative path.
+
 ## [0.2.0] - 2026-09-29
 
 ### Added
