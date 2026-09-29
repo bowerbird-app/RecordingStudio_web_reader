@@ -86,10 +86,10 @@ HTTP 403, 404, and 500 are pages. A timeout, an unsafe URL, a non-HTML body, or 
 | `page.status` | HTTP status |
 | `page.headers` | Response headers, without cookie or authorization fields |
 | `page.content_type` | Media type, without parameters |
-| `page.title` | Document title |
-| `page.description` | Meta description, or `og:description` when the meta description is missing |
-| `page.canonical_url` | Absolute canonical URL when it is HTTP or HTTPS |
-| `page.text` | Main text |
+| `page.title` | Document title. When that title does not already include a title embedded in the page's player JSON, the embedded title is used |
+| `page.description` | Description embedded in the page's player JSON when one is present. Otherwise the meta description, or `og:description` when the meta description is missing |
+| `page.canonical_url` | Absolute canonical URL when the href is HTTP or HTTPS, or a relative path. A bare token such as `undefined` stays nil |
+| `page.text` | Main text. An embedded player title and description that are not already visible are placed ahead of that text |
 | `page.html` | Raw response body |
 | `page.metadata` | Structured metadata |
 | `page.links` | Absolute HTTP and HTTPS links |
@@ -97,7 +97,7 @@ HTTP 403, 404, and 500 are pages. A timeout, an unsafe URL, a non-HTML body, or 
 | `page.challenge` | JavaScript interstitial, or nil |
 | `page.to_h` | JSON-safe hash with string keys |
 
-`page.text` drops `script`, `style`, `nav`, `footer`, `header`, `aside`, and `form`, then prefers `article`, `main`, or `[role=main]`. When that selection is empty, the text is the `noscript` sentence. The raw HTML stays on `page.html`. Extraction does not call a language model. It is a deterministic selection in Nokogiri, not a full readability port. One HTML parser keeps the gem small enough for other Recording Studio gems to depend on.
+`page.text` drops `script`, `style`, `nav`, `footer`, `header`, `aside`, and `form`, then prefers `article`, `main`, or `[role=main]`. When that selection is empty, the text is the `noscript` sentence. A title and description found in the page's player JSON are placed in front of that text when they are not already there. The raw HTML stays on `page.html`. Extraction does not call a language model. It is a deterministic selection in Nokogiri, not a full readability port. One HTML parser keeps the gem small enough for other Recording Studio gems to depend on.
 
 `page.challenge` stays nil when the body looks like the document you asked for, including an HTTP 403 that still contains the article. A JavaScript interstitial sets `kind` to `:javascript`. `evidence` uses the same `source`, `path`, and `value` shape as an analysis, and can include the status, title, noscript sentence, and challenge script URL. The check is deterministic. `read` does not switch strategy on its own. Pass `strategy: :browser` to open that URL in Chrome.
 
@@ -310,6 +310,10 @@ RecordingStudio::WebReader.register_fetcher(:browser, MyGem::Browser, override: 
 ```
 
 The callable receives one hop. The hop includes `url`, `address`, `host`, `port`, `https`, timeouts, `max_bytes`, `user_agent`, and `on_overflow`. Connect to `address`. Return `status`, `headers`, `body`, `content_type`, `location`, and that same `address`. A missing or different address is refused. Do not follow redirects inside the fetcher. The reader does that, and it checks every target.
+
+## Upgrade to 0.2.1
+
+`read` still uses HTTP unless you pass `strategy:`. Title, description, and text now include a title and description embedded in the page's player JSON when the visible document does not already include them. A canonical href that is not an absolute HTTP(S) URL or a relative path stays nil. A value such as `undefined` no longer becomes a URL on the page host. Ordinary articles with their own title and body text are unchanged.
 
 ## Upgrade to 0.2.0
 
