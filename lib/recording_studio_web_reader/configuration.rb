@@ -13,11 +13,12 @@ module RecordingStudio
       attr_writer :open_timeout, :read_timeout, :write_timeout,
                   :max_redirects, :max_response_bytes,
                   :instrumentation_enabled, :fetch_strategy
-      attr_accessor :user_agent
+      attr_accessor :user_agent, :chrome_path
       attr_reader :hooks
 
       def initialize
         @user_agent = "RecordingStudioWebReader/#{VERSION}"
+        @chrome_path = nil
         @open_timeout = DEFAULT_OPEN_TIMEOUT
         @read_timeout = DEFAULT_READ_TIMEOUT
         @write_timeout = DEFAULT_WRITE_TIMEOUT
@@ -60,6 +61,7 @@ module RecordingStudio
       def to_h
         {
           user_agent: user_agent,
+          chrome_path: chrome_path,
           open_timeout: open_timeout,
           read_timeout: read_timeout,
           write_timeout: write_timeout,

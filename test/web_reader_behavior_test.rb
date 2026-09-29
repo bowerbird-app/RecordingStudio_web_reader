@@ -57,12 +57,19 @@ class WebReaderBehaviorTest < Minitest::Test
       :@configuration,
       RecordingStudio::WebReader::Configuration.new
     )
+    restore_fetchers
     RecordingStudio::WebReader.reset_extensions!
   end
 
   def teardown
+    restore_fetchers
     RecordingStudio::WebReader.reset_extensions!
     RecordingStudio::WebReader.instance_variable_set(:@configuration, @original_configuration)
+  end
+
+  def restore_fetchers
+    RecordingStudio::WebReader.register_fetcher(:http, RecordingStudio::WebReader::Http, override: true)
+    RecordingStudio::WebReader.register_fetcher(:browser, RecordingStudio::WebReader::Browser, override: true)
   end
 
   def test_read_returns_a_normalized_page_for_ordinary_html

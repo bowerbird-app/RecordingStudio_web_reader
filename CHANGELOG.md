@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.0] - 2026-09-29
+
+### Added
+
+- `:browser` is a built-in fetch strategy. `RecordingStudio::WebReader.read(url, strategy: :browser)` opens the page in Chrome and returns the rendered HTML.
+- HTTP redirects from the browser are handed back to the reader, which checks the next URL before the next hop.
+- A document request to a private or metadata address raises `UnsafeUrlError`. Other requests to those addresses are blocked.
+- `config.chrome_path` chooses the Chrome binary. When it is nil, the gem looks at `GOOGLE_CHROME_BIN` and the usual Chrome and Chromium paths.
+
+### Upgrade
+
+- The default strategy stays `:http`. Existing `read` calls do not open Chrome.
+- A host that already registered `:browser` must pass `override: true`, or that registration raises `RegistryError`.
+- `strategy: :browser` raises `FetchError` when Chrome is not installed.
+
 ## [0.1.0] - 2026-09-24
 
 ### Added

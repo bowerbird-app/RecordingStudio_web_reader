@@ -23,7 +23,7 @@ Featured In and other products
     domain rules
 ```
 
-`RecordingStudio::WebReader.read` is the public call. A private reader owns redirects, response limits, SSRF checks, and instrumentation. A fetcher performs one HTTP hop and connects to an address the reader already approved. A later browser fetcher can register beside HTTP. Callers still use `read`.
+`RecordingStudio::WebReader.read` is the public call. A private reader owns redirects, response limits, SSRF checks, and instrumentation. A fetcher performs one hop and connects to an address the reader already approved. HTTP and browser fetchers ship with the gem. Callers still use `read`.
 
 The page object hides the HTTP client and the HTML parser. Links, images, and metadata are plain Ruby values. `to_h` uses string keys so `JSON.generate(page.to_h)` works.
 
@@ -56,6 +56,7 @@ RecordingStudio::WebReader.configure do |config|
   config.max_redirects = 5
   config.max_response_bytes = 2_000_000
   config.fetch_strategy = :http
+  config.chrome_path = nil
   config.instrumentation_enabled = true
 end
 ```
@@ -63,6 +64,8 @@ end
 `nil` restores the default for each timeout, the redirect limit, the response limit, the strategy, and instrumentation. Instrumentation stays on unless you set it to `false`.
 
 The default user agent is `RecordingStudioWebReader/` plus the gem version. The default strategy is `:http`. TLS verification stays on. There is no global page cache.
+
+`chrome_path` is the Chrome binary used by `strategy: :browser`. Leave it nil to try `GOOGLE_CHROME_BIN`, then `google-chrome`, `google-chrome-stable`, and `chromium` on the usual install paths.
 
 ## Read a page
 
@@ -96,7 +99,7 @@ HTTP 403, 404, and 500 are pages. A timeout, an unsafe URL, a non-HTML body, or 
 
 `page.text` drops `script`, `style`, `nav`, `footer`, `header`, `aside`, and `form`, then prefers `article`, `main`, or `[role=main]`. When that selection is empty, the text is the `noscript` sentence. The raw HTML stays on `page.html`. Extraction does not call a language model. It is a deterministic selection in Nokogiri, not a full readability port. One HTML parser keeps the gem small enough for other Recording Studio gems to depend on.
 
-`page.challenge` stays nil when the body looks like the document you asked for, including an HTTP 403 that still contains the article. A JavaScript interstitial sets `kind` to `:javascript`. `evidence` uses the same `source`, `path`, and `value` shape as an analysis, and can include the status, title, noscript sentence, and challenge script URL. The check is deterministic. `read` does not retry. A later browser fetcher is how a caller asks again.
+`page.challenge` stays nil when the body looks like the document you asked for, including an HTTP 403 that still contains the article. A JavaScript interstitial sets `kind` to `:javascript`. `evidence` uses the same `source`, `path`, and `value` shape as an analysis, and can include the status, title, noscript sentence, and challenge script URL. The check is deterministic. `read` does not switch strategy on its own. Pass `strategy: :browser` to open that URL in Chrome.
 
 ## Metadata
 
@@ -279,7 +282,7 @@ The HTTP fetcher connects to the approved address and uses the hostname for the 
 | `InvalidUrlError` | Blank URL, or a scheme other than HTTP or HTTPS |
 | `UnsafeUrlError` | Private network, metadata host, or userinfo |
 | `TimeoutError` | Open, read, or write timeout. This is a `FetchError` |
-| `FetchError` | DNS failure, connection failure, or a redirect with no Location |
+| `FetchError` | DNS failure, connection failure, a redirect with no Location, or Chrome is not installed |
 | `TooManyRedirectsError` | More redirects than `max_redirects` |
 | `ResponseTooLargeError` | Declared or actual body over `max_response_bytes` |
 | `UnsupportedContentTypeError` | Body is not HTML. `status` is available |
@@ -288,14 +291,29 @@ The HTTP fetcher connects to the approved address and uses the hostname for the 
 
 ## Fetch strategies
 
-Register a fetcher when a page needs a browser later.
+`:http` and `:browser` are built in. `read` uses `:http` unless you pass `strategy:` or set `config.fetch_strategy`.
 
 ```ruby
-RecordingStudio::WebReader.register_fetcher(:browser, MyGem::Browser)
 RecordingStudio::WebReader.read(url, strategy: :browser)
 ```
 
+`:browser` launches Chrome, runs JavaScript, and returns the rendered HTML. While the title is still "Just a moment", "Checking your browser", or "Attention required", it waits until the read timeout. `RecordingStudio::WebReader::Browser.binary_path` is the Chrome binary it will use, or nil when Chrome is missing. A missing binary raises `FetchError`. Image probes stay on `:http`.
+
+An HTTP redirect is returned to the reader. The reader checks the next URL and opens the next hop. The browser does not follow that redirect itself. A document request to a private or metadata address raises `UnsafeUrlError`. A script, image, or other request to those addresses is blocked and the page read continues.
+
+The open timeout bounds Chrome startup. The read timeout bounds navigation and the interstitial wait.
+
+You can replace either fetcher. Pass `override: true` when the name is already registered.
+
+```ruby
+RecordingStudio::WebReader.register_fetcher(:browser, MyGem::Browser, override: true)
+```
+
 The callable receives one hop. The hop includes `url`, `address`, `host`, `port`, `https`, timeouts, `max_bytes`, `user_agent`, and `on_overflow`. Connect to `address`. Return `status`, `headers`, `body`, `content_type`, `location`, and that same `address`. A missing or different address is refused. Do not follow redirects inside the fetcher. The reader does that, and it checks every target.
+
+## Upgrade to 0.2.0
+
+`:browser` is registered by the gem. A host that registered its own `:browser` fetcher on 0.1.0 must pass `override: true`, or the second registration raises `RegistryError`. `read` without `strategy:` still uses HTTP. Chrome has to be installed before `strategy: :browser` can open a page.
 
 ## Dummy app
 
