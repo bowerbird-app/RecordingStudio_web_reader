@@ -170,7 +170,7 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Opened in the browser."
     assert_includes response.body, "Browser"
   ensure
-    RecordingStudio::WebReader.register_fetcher(:browser, DummyBrowser, override: true)
+    RecordingStudio::WebReader.register_fetcher(:browser, RecordingStudio::WebReader::Browser, override: true)
   end
 
   private

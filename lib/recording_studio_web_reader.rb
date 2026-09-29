@@ -9,6 +9,7 @@ require "recording_studio_web_reader/challenge"
 require "recording_studio_web_reader/safety"
 require "recording_studio_web_reader/image_header"
 require "recording_studio_web_reader/http"
+require "recording_studio_web_reader/browser"
 require "recording_studio_web_reader/document"
 require "recording_studio_web_reader/registry"
 require "recording_studio_web_reader/read"
@@ -108,7 +109,10 @@ module RecordingStudio
       end
 
       def registry
-        @registry ||= Registry.new.tap { |registry| registry.register_fetcher(:http, Http, override: true) }
+        @registry ||= Registry.new.tap do |registry|
+          registry.register_fetcher(:http, Http, override: true)
+          registry.register_fetcher(:browser, Browser, override: true)
+        end
       end
 
       def cache_key(url, strategy)

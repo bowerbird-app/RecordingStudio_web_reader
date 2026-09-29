@@ -70,6 +70,15 @@ class ConfigurationTest < Minitest::Test
     refute result.key?(:html)
   end
 
+  def test_chrome_path_defaults_to_nil_and_can_be_set
+    assert_nil @configuration.chrome_path
+
+    @configuration.merge!(chrome_path: "/usr/bin/google-chrome")
+
+    assert_equal "/usr/bin/google-chrome", @configuration.chrome_path
+    assert_equal "/usr/bin/google-chrome", @configuration.to_h.fetch(:chrome_path)
+  end
+
   def test_configure_without_block_is_safe
     RecordingStudio::WebReader.configure
 
