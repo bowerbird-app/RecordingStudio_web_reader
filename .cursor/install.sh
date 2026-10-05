@@ -69,14 +69,27 @@ bundle install
 ( cd test/dummy && bundle install )
 
 # ---------------------------------------------------------------------------
-# 5. Database + assets for the dummy host app
+# 5. Dummy credentials (shared RecordingStudio_* development master key)
+# ---------------------------------------------------------------------------
+# The committed credentials.yml.enc is reused across gems. Set
+# RAILS_MASTER_KEY in the environment, or write test/dummy/config/master.key.
+# Do not generate a per-repo master key. Never commit the key.
+if [ -n "${RAILS_MASTER_KEY:-}" ]; then
+  log "Writing dummy master.key from RAILS_MASTER_KEY"
+  umask 077
+  mkdir -p "${ROOT}/test/dummy/config"
+  printf '%s' "${RAILS_MASTER_KEY}" > "${ROOT}/test/dummy/config/master.key"
+fi
+
+# ---------------------------------------------------------------------------
+# 6. Database + assets for the dummy host app
 # ---------------------------------------------------------------------------
 log "Preparing dummy app database and assets"
 ( cd test/dummy && bundle exec rails db:prepare )
 ( cd test/dummy && bundle exec rails tailwindcss:build )
 
 # ---------------------------------------------------------------------------
-# 6. Fetch Recording Studio Cursor skills and plugin rules (best-effort)
+# 7. Fetch Recording Studio Cursor skills and plugin rules (best-effort)
 # ---------------------------------------------------------------------------
 log "Fetching Recording Studio skills and plugin rules"
 "${SCRIPT_DIR}/fetch-skills.sh" || true
