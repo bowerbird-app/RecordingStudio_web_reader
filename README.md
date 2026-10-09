@@ -325,4 +325,4 @@ The dummy app is a signed-in developer page. Enter a URL and inspect the final U
 
 Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key.
 
-The dummy Gemfile pins Recording Studio `v4.4.0`, FlatPack `v0.1.177`, and Accessible `v0.9.1`. Sign in at `/users/sign_in` with `admin@admin.com` and `Password`.
+The dummy Gemfile pins Recording Studio `v4.4.0`, FlatPack `v0.1.177`, Accessible `v0.13.0`, and AI `v0.8.0`. Sign in at `/users/sign_in` with `admin@admin.com` and `Password`.
