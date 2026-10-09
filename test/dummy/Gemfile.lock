@@ -30,14 +30,14 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_root_switchable.git
-  revision: 98be393513dea19e5cd633ef83616e282c92b6ea
-  tag: v0.5.0
+  revision: 78ea1ad2b7705260fb07144ac32e7604b77090ab
+  tag: v0.6.0
   specs:
-    recording_studio_root_switchable (0.5.0)
+    recording_studio_root_switchable (0.6.0)
       flat_pack
       rails (~> 8.1.0)
       recording_studio (~> 4.1)
-      recording_studio_accessible (~> 0.6)
+      recording_studio_accessible (~> 0.11)
 
 GIT
   remote: https://github.com/bowerbird-app/flatpack.git
@@ -625,7 +625,7 @@ CHECKSUMS
   recording_studio (4.4.0)
   recording_studio_accessible (0.13.0)
   recording_studio_ai (0.8.0)
-  recording_studio_root_switchable (0.5.0)
+  recording_studio_root_switchable (0.6.0)
   recording_studio_web_reader (0.2.1)
   regexp_parser (2.11.3) sha256=ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4
   reline (0.6.3) sha256=1198b04973565b36ec0f11542ab3f5cfeeec34823f4e54cebde90968092b1835
