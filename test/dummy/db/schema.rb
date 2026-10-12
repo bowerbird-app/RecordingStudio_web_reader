@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_09_101605) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_12_044042) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -25,6 +25,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_101605) do
     t.datetime "created_at", null: false
     t.string "title"
     t.datetime "updated_at", null: false
+  end
+
+  create_table "recording_studio_access_constraints", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "action", null: false
+    t.string "allowed_audiences", default: [], null: false, array: true
+    t.datetime "created_at", null: false
+    t.index ["action"], name: "index_recording_studio_access_constraints_on_action"
   end
 
   create_table "recording_studio_access_invitations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -46,6 +53,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_101605) do
     t.index ["recording_id"], name: "index_recording_studio_access_invitations_on_recording_id"
     t.index ["token_digest"], name: "idx_rs_access_invitations_token_digest", unique: true
     t.check_constraint "accepted_at IS NULL OR revoked_at IS NULL", name: "access_invitations_not_accepted_and_revoked"
+  end
+
+  create_table "recording_studio_access_rules", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "action", null: false
+    t.string "audience", null: false
+    t.datetime "created_at", null: false
+    t.index ["action"], name: "index_recording_studio_access_rules_on_action"
   end
 
   create_table "recording_studio_accesses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -337,7 +351,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_101605) do
     t.check_constraint "attachment_count >= 0 AND attachment_total_bytes >= 0 AND citation_count >= 0", name: "chk_rsai_runs_nonnegative_attachment_counts"
     t.check_constraint "attempt_count >= 0 AND retry_count >= 0 AND fallback_count >= 0 AND custom_tool_invocation_count >= 0", name: "chk_rsai_runs_nonnegative_counts"
     t.check_constraint "completed_at IS NULL OR started_at IS NULL OR completed_at >= started_at", name: "chk_rsai_runs_timeline"
-    t.check_constraint "operation::text = ANY (ARRAY['generation'::character varying, 'stream'::character varying, 'batch'::character varying, 'decision'::character varying, 'tool'::character varying]::text[])", name: "chk_rsai_runs_operation"
+    t.check_constraint "operation::text = ANY (ARRAY['generation'::character varying::text, 'stream'::character varying::text, 'batch'::character varying::text, 'decision'::character varying::text, 'tool'::character varying::text])", name: "chk_rsai_runs_operation"
     t.check_constraint "status::text = ANY (ARRAY['pending'::character varying::text, 'running'::character varying::text, 'completed'::character varying::text, 'failed'::character varying::text, 'cancelled'::character varying::text])", name: "chk_rsai_runs_status"
   end
 
