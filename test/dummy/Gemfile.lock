@@ -22,12 +22,13 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_accessible.git
-  revision: db1d692fdecccdf251c7c8b5dc19074a0e4da97c
-  tag: v0.15.0
+  revision: 226c6a92472f6ddf1fabcb27ea52ef6a23e53f87
+  tag: v0.17.0
   specs:
-    recording_studio_accessible (0.15.0)
+    recording_studio_accessible (0.17.0)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
+      recording_studio_trashable (~> 0.10)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_cache.git
@@ -58,6 +59,17 @@ GIT
       recording_studio (~> 4.1)
       recording_studio_accessible (~> 0.15)
       recording_studio_cache (~> 0.5)
+      recording_studio_metrics (~> 0.2)
+
+GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_trashable.git
+  revision: 6f590d0b1ed6cd64515ae5ffec280b28bbbca20d
+  tag: v0.10.0
+  specs:
+    recording_studio_trashable (0.10.0)
+      flat_pack (>= 0.1.74)
+      rails (~> 8.1.0)
+      recording_studio (~> 4.2)
       recording_studio_metrics (~> 0.2)
 
 GIT
@@ -516,6 +528,7 @@ DEPENDENCIES
   recording_studio_cache!
   recording_studio_metrics!
   recording_studio_root_switchable!
+  recording_studio_trashable!
   recording_studio_web_reader!
   rubocop-rails-omakase
   solid_cable
@@ -646,11 +659,12 @@ CHECKSUMS
   rbs (4.0.3) sha256=5a7bf70e2628549d9a1f44eae447b2cfe55968a9c60cfff52693a4bdcc020e14
   rdoc (8.0.0) sha256=03bf8c08a9639658855a0cfd77c0abca8325c227693f7f33f82957811348c469
   recording_studio (4.5.0)
-  recording_studio_accessible (0.15.0)
+  recording_studio_accessible (0.17.0)
   recording_studio_ai (0.11.0)
   recording_studio_cache (0.5.0)
   recording_studio_metrics (0.2.0)
   recording_studio_root_switchable (0.9.0)
+  recording_studio_trashable (0.10.0)
   recording_studio_web_reader (0.2.1)
   regexp_parser (2.11.3) sha256=ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4
   reline (0.6.3) sha256=1198b04973565b36ec0f11542ab3f5cfeeec34823f4e54cebde90968092b1835
