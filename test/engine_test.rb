@@ -5,13 +5,13 @@ require "minitest/mock"
 
 class EngineTest < Minitest::Test
   def setup
-    @original_configuration = RecordingStudio::WebReader.instance_variable_get(:@configuration)
-    RecordingStudio::WebReader.instance_variable_set(:@configuration, RecordingStudio::WebReader::Configuration.new)
+    save_web_reader_state
+    isolate_web_reader_configuration
   end
 
   def teardown
     RecordingStudio::WebReader.configuration.hooks.clear!
-    RecordingStudio::WebReader.instance_variable_set(:@configuration, @original_configuration)
+    restore_web_reader_state
   end
 
   def test_before_and_after_initialize_initializers_run_hooks

@@ -52,11 +52,8 @@ class WebReaderBehaviorTest < Minitest::Test
   HTML
 
   def setup
-    @original_configuration = RecordingStudio::WebReader.instance_variable_get(:@configuration)
-    RecordingStudio::WebReader.instance_variable_set(
-      :@configuration,
-      RecordingStudio::WebReader::Configuration.new
-    )
+    save_web_reader_state
+    isolate_web_reader_configuration
     restore_fetchers
     RecordingStudio::WebReader.reset_extensions!
   end
@@ -64,7 +61,7 @@ class WebReaderBehaviorTest < Minitest::Test
   def teardown
     restore_fetchers
     RecordingStudio::WebReader.reset_extensions!
-    RecordingStudio::WebReader.instance_variable_set(:@configuration, @original_configuration)
+    restore_web_reader_state
   end
 
   def restore_fetchers

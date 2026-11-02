@@ -311,6 +311,10 @@ RecordingStudio::WebReader.register_fetcher(:browser, MyGem::Browser, override: 
 
 The callable receives one hop. The hop includes `url`, `address`, `host`, `port`, `https`, timeouts, `max_bytes`, `user_agent`, and `on_overflow`. Connect to `address`. Return `status`, `headers`, `body`, `content_type`, `location`, and that same `address`. A missing or different address is refused. Do not follow redirects inside the fetcher. The reader does that, and it checks every target.
 
+## Upgrade to 0.2.8
+
+`VERSION` is `0.2.8`. `read` still uses HTTP unless you pass `strategy:`.
+
 ## Upgrade to 0.2.1
 
 `read` still uses HTTP unless you pass `strategy:`. Title, description, and text now include a title and description embedded in the page's player JSON when the visible document does not already include them. A canonical href that is not an absolute HTTP(S) URL or a relative path stays nil. A value such as `undefined` no longer becomes a URL on the page host. Ordinary articles with their own title and body text are unchanged.
