@@ -32,6 +32,22 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Open in a browser"
   end
 
+  test "sign out is a turbo delete link" do
+    get root_path
+
+    assert_response :success
+    assert_select "a[href=?][data-turbo-method=delete]", destroy_user_session_path, text: "Sign out"
+    assert_select "button[url]", count: 0
+  end
+
+  test "sign out ends the session" do
+    delete destroy_user_session_path
+
+    assert_redirected_to root_path
+    get root_path
+    assert_redirected_to new_user_session_path
+  end
+
   test "an unsafe url is shown as an observation error" do
     get root_path, params: { url: "http://127.0.0.1/secret" }
 
