@@ -5,11 +5,13 @@ require "socket"
 
 class BrowserFetcherTest < Minitest::Test
   def setup
-    RecordingStudio::WebReader.reset!
+    save_web_reader_state
+    isolate_web_reader_configuration
+    isolate_web_reader_registry
   end
 
   def teardown
-    RecordingStudio::WebReader.reset!
+    restore_web_reader_state
   end
 
   def test_the_gem_registers_the_browser_fetcher

@@ -2,11 +2,6 @@
 
 ## [0.2.8] - 2026-11-02
 
-### Added
-
-- `RecordingStudio::WebReader.registry` is a public reader. Callers no longer use `send(:registry)`.
-- `RecordingStudio::WebReader.reset!` replaces configuration and the registry with defaults.
-
 ### Changed
 
 - `VERSION` is `0.2.8`. It now sits after tag `v0.2.7`.
@@ -15,9 +10,7 @@
 
 ### Upgrade
 
-- Hosts that called `WebReader.send(:registry)` can call `WebReader.registry`.
-- Tests that poked `@configuration` or `@registry` can call `WebReader.reset!`.
-- `reset!` does not change `read`. Default fetch strategy stays `:http`.
+- `read` is unchanged. Default fetch strategy stays `:http`.
 
 ## [0.2.7] - 2026-10-14
 

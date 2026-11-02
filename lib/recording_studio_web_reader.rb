@@ -82,18 +82,6 @@ module RecordingStudio
         registry.clear_extensions!
       end
 
-      def registry
-        @registry ||= Registry.new.tap do |registry|
-          registry.register_fetcher(:http, Http, override: true)
-          registry.register_fetcher(:browser, Browser, override: true)
-        end
-      end
-
-      def reset!
-        @configuration = Configuration.new
-        @registry = nil
-      end
-
       private
 
       def with_probe(image, state)
@@ -118,6 +106,13 @@ module RecordingStudio
         state[:seen][url] = probe_image(url)
       rescue Error
         state[:seen][url] = nil
+      end
+
+      def registry
+        @registry ||= Registry.new.tap do |registry|
+          registry.register_fetcher(:http, Http, override: true)
+          registry.register_fetcher(:browser, Browser, override: true)
+        end
       end
 
       def cache_key(url, strategy)

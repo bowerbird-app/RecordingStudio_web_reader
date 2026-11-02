@@ -14,13 +14,14 @@ class EmbeddedVideoPageTest < Minitest::Test
   FOOTER = "About Press Copyright Privacy NFL Sunday Ticket"
 
   def setup
-    RecordingStudio::WebReader.reset!
+    save_web_reader_state
+    isolate_web_reader_configuration
     restore_fetchers
   end
 
   def teardown
     restore_fetchers
-    RecordingStudio::WebReader.reset!
+    restore_web_reader_state
   end
 
   def restore_fetchers

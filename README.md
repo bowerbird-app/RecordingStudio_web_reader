@@ -169,7 +169,7 @@ page.extract(:article_metadata)
 # => { title: "...", author: "..." }
 ```
 
-The callable receives the page. Keyword arguments passed to `extract` are forwarded. Names live in a namespace. The default namespace is `:recording_studio_web_reader`. Pass `namespace:` to both `register_extractor` and `extract` when another gem needs its own name. Registering the same namespace and name twice raises `RegistryError`. Pass `override: true` to replace it. `RecordingStudio::WebReader.registry` is the live registry. `RecordingStudio::WebReader.extensions` lists fetchers, extractors, and analyses. `reset_extensions!` clears extractors and analyses. It leaves fetchers in place. `RecordingStudio::WebReader.reset!` replaces configuration and the registry with defaults.
+The callable receives the page. Keyword arguments passed to `extract` are forwarded. Names live in a namespace. The default namespace is `:recording_studio_web_reader`. Pass `namespace:` to both `register_extractor` and `extract` when another gem needs its own name. Registering the same namespace and name twice raises `RegistryError`. Pass `override: true` to replace it. `RecordingStudio::WebReader.extensions` lists fetchers, extractors, and analyses. `reset_extensions!` clears extractors and analyses. It leaves fetchers in place.
 
 ## Register an analysis
 
@@ -313,7 +313,7 @@ The callable receives one hop. The hop includes `url`, `address`, `host`, `port`
 
 ## Upgrade to 0.2.8
 
-`RecordingStudio::WebReader.registry` is public. Call it instead of `send(:registry)`. `RecordingStudio::WebReader.reset!` replaces configuration and the registry with defaults. `read` still uses HTTP unless you pass `strategy:`.
+`VERSION` is `0.2.8`. `read` still uses HTTP unless you pass `strategy:`.
 
 ## Upgrade to 0.2.1
 

@@ -52,13 +52,16 @@ class WebReaderBehaviorTest < Minitest::Test
   HTML
 
   def setup
-    RecordingStudio::WebReader.reset!
+    save_web_reader_state
+    isolate_web_reader_configuration
     restore_fetchers
+    RecordingStudio::WebReader.reset_extensions!
   end
 
   def teardown
     restore_fetchers
-    RecordingStudio::WebReader.reset!
+    RecordingStudio::WebReader.reset_extensions!
+    restore_web_reader_state
   end
 
   def restore_fetchers

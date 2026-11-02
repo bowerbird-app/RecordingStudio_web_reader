@@ -165,9 +165,9 @@ class FetchSkillsTest < Minitest::Test
     assert_equal 0, status.exitstatus
     assert_equal "", tracked.strip
 
-    gemspec = File.read(File.join(root, "recording_studio_web_reader.gemspec"))
-    assert_includes gemspec, 'path == ".cursor" || path.start_with?(".cursor/")'
-    refute_match(/Dir\[[^\]]*["']\.cursor/, gemspec)
+    spec = Gem::Specification.load(File.join(root, "recording_studio_web_reader.gemspec"))
+    cursor_files = spec.files.select { |path| path == ".cursor" || path.split("/").include?(".cursor") }
+    assert_empty cursor_files
   end
 
   private
