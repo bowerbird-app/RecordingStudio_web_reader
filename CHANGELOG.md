@@ -1,5 +1,60 @@
 # Changelog
 
+## [0.2.8] - 2026-11-02
+
+### Added
+
+- `RecordingStudio::WebReader.registry` is a public reader. Callers no longer use `send(:registry)`.
+- `RecordingStudio::WebReader.reset!` replaces configuration and the registry with defaults.
+
+### Changed
+
+- `VERSION` is `0.2.8`. It now sits after tag `v0.2.7`.
+- SimpleCov output under `coverage/` and `test/dummy/coverage/` is gitignored and untracked.
+- Non-matrix GitHub Actions `ruby/setup-ruby` steps pin `ruby-version: '3.3'`. Matrix jobs still use the Ruby matrix.
+
+### Upgrade
+
+- Hosts that called `WebReader.send(:registry)` can call `WebReader.registry`.
+- Tests that poked `@configuration` or `@registry` can call `WebReader.reset!`.
+- `reset!` does not change `read`. Default fetch strategy stays `:http`.
+
+## [0.2.7] - 2026-10-14
+
+### Changed
+
+- Dummy pins Recording Studio `v4.6.0`, Accessible `v0.17.0`, AI `v0.11.0`, and Root Switchable `v0.9.0`.
+
+## [0.2.6] - 2026-10-12
+
+### Changed
+
+- Dummy pins AI `v0.10.0`, Recording Studio `v4.5.0`, Accessible `v0.15.0`, and Root Switchable `v0.8.0`.
+
+## [0.2.5] - 2026-10-09
+
+### Changed
+
+- Dummy pins Recording Studio `v4.4.0`.
+
+## [0.2.4] - 2026-10-08
+
+### Changed
+
+- Dummy pins Recording Studio `v4.3.0`.
+
+## [0.2.3] - 2026-10-05
+
+### Changed
+
+- Dummy credentials use the shared Recording Studio development master key.
+
+## [0.2.2] - 2026-10-05
+
+### Changed
+
+- Dummy pins Recording Studio `v4.2.2`.
+
 ## [0.2.1] - 2026-09-29
 
 ### Fixed
@@ -46,3 +101,14 @@
 - `page.challenge` records a JavaScript interstitial without retrying the fetch.
 - The dummy page can open a URL in Chrome when you choose **Open in a browser**.
 - The dummy page asks Jev whether a paywall holds the writing back.
+
+[0.2.8]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.7...v0.2.8
+[0.2.7]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.6...v0.2.7
+[0.2.6]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.5...v0.2.6
+[0.2.5]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.4...v0.2.5
+[0.2.4]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.3...v0.2.4
+[0.2.3]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.2...v0.2.3
+[0.2.2]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/bowerbird-app/RecordingStudio_web_reader/releases/tag/v0.1.0

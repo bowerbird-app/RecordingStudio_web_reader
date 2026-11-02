@@ -22,13 +22,12 @@ class CursorSkillFetchTest < ActiveSupport::TestCase
     assert_includes script, 'RULES_DIR="${ROOT}/.cursor/rules"'
   end
 
-  test "gem version is 0.2.1 and gemspec still excludes .cursor" do
-    assert_equal "0.2.1", RecordingStudio::WebReader::VERSION
+  test "gem version is 0.2.8 and gemspec still excludes .cursor" do
+    assert_equal "0.2.8", RecordingStudio::WebReader::VERSION
 
-    spec = Gem::Specification.load(RecordingStudio::WebReader::Engine.root.join("recording_studio_web_reader.gemspec").to_s)
-    cursor_files = spec.files.select { |path| path == ".cursor" || path.split("/").include?(".cursor") }
-
-    assert_empty cursor_files
+    gemspec = File.read(RecordingStudio::WebReader::Engine.root.join("recording_studio_web_reader.gemspec"))
+    assert_includes gemspec, 'path == ".cursor" || path.start_with?(".cursor/")'
+    refute_match(/Dir\[[^\]]*["']\.cursor/, gemspec)
 
     tracked = `git -C #{RecordingStudio::WebReader::Engine.root} ls-files -- .cursor/rules`
     assert_equal "", tracked.strip

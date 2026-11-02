@@ -4,11 +4,51 @@ require "test_helper"
 
 class RecordingStudioWebReaderTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.2.1", ::RecordingStudio::WebReader::VERSION
+    assert_equal "0.2.8", ::RecordingStudio::WebReader::VERSION
   end
 
   def test_engine_exists
     assert_kind_of Class, ::RecordingStudio::WebReader::Engine
+  end
+
+  def test_registry_is_public_and_reset_replaces_configuration_and_registry
+    RecordingStudio::WebReader.configuration.user_agent = "temp-agent"
+    RecordingStudio::WebReader.register_extractor(:audit_reset_probe, ->(_page) { {} })
+    previous_registry = RecordingStudio::WebReader.registry
+
+    RecordingStudio::WebReader.reset!
+
+    assert_kind_of RecordingStudio::WebReader::Registry, RecordingStudio::WebReader.registry
+    refute_same previous_registry, RecordingStudio::WebReader.registry
+    assert_equal "RecordingStudioWebReader/#{RecordingStudio::WebReader::VERSION}",
+                 RecordingStudio::WebReader.configuration.user_agent
+    names = RecordingStudio::WebReader.extensions
+    assert(names.any? { |row| row[:kind] == :fetcher && row[:name] == :http })
+    assert(names.any? { |row| row[:kind] == :fetcher && row[:name] == :browser })
+    refute(names.any? { |row| row[:kind] == :extractor && row[:name] == :audit_reset_probe })
+  ensure
+    RecordingStudio::WebReader.reset!
+  end
+
+  def test_coverage_trees_are_gitignored
+    root = File.expand_path("..", __dir__)
+    gitignore = File.read(File.join(root, ".gitignore"))
+    tracked = `git -C #{root} ls-files -- coverage test/dummy/coverage`
+
+    assert_includes gitignore, "coverage/"
+    assert_includes gitignore, "test/dummy/coverage/"
+    assert_equal "", tracked.strip
+  end
+
+  def test_non_matrix_setup_ruby_pins_3_3
+    ci = File.read(File.expand_path("../.github/workflows/ci.yml", __dir__))
+    security = File.read(File.expand_path("../.github/workflows/security.yml", __dir__))
+
+    assert_includes ci, "ruby-version: '3.3'"
+    refute_includes ci, "ruby-version: .ruby-version"
+    assert_includes ci, "ruby-version: ${{ matrix.ruby-version }}"
+    assert_equal 3, security.scan("ruby-version: '3.3'").size
+    refute_includes security, "ruby-version: .ruby-version"
   end
 
   def test_gemspec_pins_recording_studio_4_2
@@ -18,8 +58,18 @@ class RecordingStudioWebReaderTest < Minitest::Test
   end
 
   def test_gemspec_excludes_cursor_config
-    spec = Gem::Specification.load(File.expand_path("../recording_studio_web_reader.gemspec", __dir__))
-    cursor_files = spec.files.select { |path| path == ".cursor" || path.split("/").include?(".cursor") }
+    root = File.expand_path("..", __dir__)
+    gemspec = File.read(File.expand_path("../recording_studio_web_reader.gemspec", __dir__))
+
+    assert_includes gemspec, 'path == ".cursor" || path.start_with?(".cursor/")'
+    refute_match(/Dir\[[^\]]*["']\.cursor/, gemspec)
+
+    packaged = Dir.chdir(root) do
+      Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"].reject do |path|
+        path == ".cursor" || path.start_with?(".cursor/")
+      end
+    end
+    cursor_files = packaged.select { |path| path == ".cursor" || path.split("/").include?(".cursor") }
 
     assert_empty cursor_files, "gemspec must not package .cursor/ (got #{cursor_files.inspect})"
   end

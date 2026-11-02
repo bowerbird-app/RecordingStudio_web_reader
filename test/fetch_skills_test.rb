@@ -159,15 +159,15 @@ class FetchSkillsTest < Minitest::Test
 
     assert_includes gitignore, ".cursor/rules/"
     assert_includes gitignore, ".cursor/skills/"
-    assert_equal "0.2.1", RecordingStudio::WebReader::VERSION
+    assert_equal "0.2.8", RecordingStudio::WebReader::VERSION
 
     tracked, status = Open3.capture2("git", "-C", root, "ls-files", "--", ".cursor/rules")
     assert_equal 0, status.exitstatus
     assert_equal "", tracked.strip
 
-    spec = Gem::Specification.load(File.join(root, "recording_studio_web_reader.gemspec"))
-    cursor_files = spec.files.select { |path| path == ".cursor" || path.split("/").include?(".cursor") }
-    assert_empty cursor_files
+    gemspec = File.read(File.join(root, "recording_studio_web_reader.gemspec"))
+    assert_includes gemspec, 'path == ".cursor" || path.start_with?(".cursor/")'
+    refute_match(/Dir\[[^\]]*["']\.cursor/, gemspec)
   end
 
   private

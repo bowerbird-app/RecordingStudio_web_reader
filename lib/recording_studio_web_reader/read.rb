@@ -238,7 +238,7 @@ module RecordingStudio
       end
 
       def registry
-        WebReader.send(:registry)
+        WebReader.registry
       end
 
       def monotonic_now

@@ -14,17 +14,13 @@ class EmbeddedVideoPageTest < Minitest::Test
   FOOTER = "About Press Copyright Privacy NFL Sunday Ticket"
 
   def setup
-    @original_configuration = RecordingStudio::WebReader.instance_variable_get(:@configuration)
-    RecordingStudio::WebReader.instance_variable_set(
-      :@configuration,
-      RecordingStudio::WebReader::Configuration.new
-    )
+    RecordingStudio::WebReader.reset!
     restore_fetchers
   end
 
   def teardown
     restore_fetchers
-    RecordingStudio::WebReader.instance_variable_set(:@configuration, @original_configuration)
+    RecordingStudio::WebReader.reset!
   end
 
   def restore_fetchers

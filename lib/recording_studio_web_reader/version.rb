@@ -2,6 +2,6 @@
 
 module RecordingStudio
   module WebReader
-    VERSION = "0.2.1"
+    VERSION = "0.2.8"
   end
 end
