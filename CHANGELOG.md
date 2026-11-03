@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Dummy Sign out uses FlatPack Button `href:` so the link is an `<a>` with Turbo DELETE, not a dead `<button url>`.
+
 ## [0.2.8] - 2026-11-02
 
 ### Changed
