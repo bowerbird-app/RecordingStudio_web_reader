@@ -14,7 +14,7 @@ module RecordingStudio
                   :max_redirects, :max_response_bytes,
                   :instrumentation_enabled, :fetch_strategy
       attr_accessor :user_agent, :chrome_path
-      attr_reader :hooks
+      attr_reader :hooks, :layout
 
       def initialize
         @user_agent = "RecordingStudioWebReader/#{VERSION}"
@@ -26,7 +26,12 @@ module RecordingStudio
         @max_response_bytes = DEFAULT_MAX_RESPONSE_BYTES
         @instrumentation_enabled = true
         @fetch_strategy = DEFAULT_STRATEGY
+        @layout = RecordingStudio::DEFAULT_LAYOUT
         @hooks = RecordingStudio::Hooks.new
+      end
+
+      def layout=(value)
+        @layout = RecordingStudio::Layout.accept(value)
       end
 
       def open_timeout
@@ -69,6 +74,7 @@ module RecordingStudio
           max_response_bytes: max_response_bytes,
           fetch_strategy: fetch_strategy,
           instrumentation_enabled: instrumentation_enabled,
+          layout: layout,
           hooks_registered: hooks.registered_counts
         }
       end

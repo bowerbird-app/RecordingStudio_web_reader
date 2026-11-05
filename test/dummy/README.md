@@ -39,6 +39,6 @@ Then open the app and sign in with:
 
 Use this app to verify the generated addon experience before renaming the gem or copying patterns into another host app. If a layout, route, asset source, or Recording Studio initializer change breaks here, the template likely needs adjustment before reuse.
 
-Authenticated pages use Recording Studio's shared default layout. Devise sign-in keeps `layouts/application`. Replace dummy docs page content so it matches the gem's actual concepts.
+Authenticated pages use `recording_studio_layout` (core Default Layout). Devise sign-in keeps `layouts/application`. Replace dummy docs page content so it matches the gem's actual concepts.
 
 The home page in `app/views/home/index.html.erb` should stay a minimal demo surface for the gem's core feature. Do not turn it into a wall of documentation; the dummy docs pages exist so deeper explanations can live in focused sections.

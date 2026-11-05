@@ -2,9 +2,19 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-05
+
 ### Changed
 
-- Dummy Sign out uses FlatPack Button `href:` so the link is an `<a>` with Turbo DELETE, not a dead `<button url>`.
+- Require `recording_studio` `>= 6.3.0`. The dummy pins Recording Studio `v6.3.0`, Accessible `v0.24.1`, Trashable `v0.12.2`, Root Switchable `v0.11.5`, Cache `v0.6.2`, Metrics `v0.7.2`, Logs `v0.7.3`, AI `v0.19.6`, and FlatPack `v0.1.341`.
+- `RecordingStudio::WebReader.configuration.layout` defaults to `RecordingStudio::DEFAULT_LAYOUT` and is validated by `RecordingStudio::Layout.accept`.
+- Engine controllers call `recording_studio_layout`. Dummy pages drop FlatPack Card `style:`.
+- Refresh both lockfiles to Rails `8.1.4.1`, rack `>= 3.2.8`, nokogiri `>= 1.19.5`, loofah `>= 2.25.3`, and rails-html-sanitizer `>= 1.7.2`. Local Ruby is `3.3.13`.
+- Remove leftover template files (`UPDATE_SUMMARY.md`, `MIGRATION_NOTES.md`, `docs/gem_template/`).
+
+### Upgrade
+
+- See `UPGRADING.md`. `read` is unchanged. Default fetch strategy stays `:http`. Hosts must run Recording Studio `>= 6.3.0` and call `recording_studio_layout` instead of hard-coding `layout "application"`.
 
 ## [0.2.8] - 2026-11-02
 
@@ -101,6 +111,7 @@
 - The dummy page can open a URL in Chrome when you choose **Open in a browser**.
 - The dummy page asks Jev whether a paywall holds the writing back.
 
+[0.3.0]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.8...v0.3.0
 [0.2.8]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.5...v0.2.6

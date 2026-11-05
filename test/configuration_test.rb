@@ -84,4 +84,21 @@ class ConfigurationTest < Minitest::Test
 
     assert_kind_of RecordingStudio::WebReader::Configuration, RecordingStudio::WebReader.configuration
   end
+
+  def test_layout_defaults_to_core_default_layout
+    assert_equal RecordingStudio::DEFAULT_LAYOUT, @configuration.layout
+    assert_equal RecordingStudio::DEFAULT_LAYOUT, @configuration.to_h.fetch(:layout)
+  end
+
+  def test_layout_accepts_a_name_and_rejects_a_positional_callable
+    @configuration.layout = "application"
+
+    assert_equal "application", @configuration.layout
+
+    error = assert_raises(ArgumentError) do
+      @configuration.layout = ->(controller) { "application-#{controller.class}" }
+    end
+    assert_match(/controller:/, error.message)
+    assert_equal "application", @configuration.layout
+  end
 end
