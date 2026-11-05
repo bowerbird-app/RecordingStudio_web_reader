@@ -58,10 +58,13 @@ RecordingStudio::WebReader.configure do |config|
   config.fetch_strategy = :http
   config.chrome_path = nil
   config.instrumentation_enabled = true
+  config.layout = RecordingStudio::DEFAULT_LAYOUT
 end
 ```
 
 `nil` restores the default for each timeout, the redirect limit, the response limit, the strategy, and instrumentation. Instrumentation stays on unless you set it to `false`.
+
+`layout` defaults to `RecordingStudio::DEFAULT_LAYOUT`. Pass a layout name, `false`, or a callable that accepts `controller:`. `RecordingStudio::Layout.accept` validates the value. Engine controllers call `recording_studio_layout`. Do not hard-code `layout "application"`.
 
 The default user agent is `RecordingStudioWebReader/` plus the gem version. The default strategy is `:http`. TLS verification stays on. There is no global page cache.
 
@@ -311,6 +314,10 @@ RecordingStudio::WebReader.register_fetcher(:browser, MyGem::Browser, override: 
 
 The callable receives one hop. The hop includes `url`, `address`, `host`, `port`, `https`, timeouts, `max_bytes`, `user_agent`, and `on_overflow`. Connect to `address`. Return `status`, `headers`, `body`, `content_type`, `location`, and that same `address`. A missing or different address is refused. Do not follow redirects inside the fetcher. The reader does that, and it checks every target.
 
+## Upgrade to 0.3.0
+
+Require Recording Studio `>= 6.3.0`. Engine screens use `recording_studio_layout` and `configuration.layout`. See `UPGRADING.md`. `read` still uses HTTP unless you pass `strategy:`.
+
 ## Upgrade to 0.2.8
 
 `VERSION` is `0.2.8`. `read` still uses HTTP unless you pass `strategy:`.
@@ -329,4 +336,4 @@ The dummy app is a signed-in developer page. Enter a URL and inspect the final U
 
 Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key.
 
-The dummy Gemfile pins Recording Studio `v4.7.0`, FlatPack `v0.1.177`, Accessible `v0.18.0`, Trashable `v0.11.0`, Root Switchable `v0.9.0`, Cache `v0.5.0`, Metrics `v0.2.0`, and AI `v0.11.0`. Sign in at `/users/sign_in` with `admin@admin.com` and `Password`.
+The dummy Gemfile pins Recording Studio `v6.3.0`, FlatPack `v0.1.341`, Accessible `v0.24.1`, Trashable `v0.12.2`, Root Switchable `v0.11.5`, Cache `v0.6.2`, Metrics `v0.7.2`, Logs `v0.7.3`, and AI `v0.19.6`. Sign in at `/users/sign_in` with `admin@admin.com` and `Password`.

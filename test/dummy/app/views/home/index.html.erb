@@ -46,7 +46,7 @@
   <% end %>
 
   <% if @page %>
-    <%= render FlatPack::Card::Component.new(style: :default) do |card| %>
+    <%= render FlatPack::Card::Component.new do |card| %>
       <% card.header do %>
         <%= render FlatPack::PageTitle::Component.new(
           title: @page.title.presence || "Untitled page",
@@ -80,7 +80,7 @@
       <% end %>
     <% end %>
 
-    <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+    <%= render FlatPack::Card::Component.new do |card| %>
       <% card.header do %>
         <%= render FlatPack::PageTitle::Component.new(title: "Text", variant: :h3, class: "mb-0 pb-0") %>
       <% end %>
@@ -101,7 +101,7 @@
       <% end %>
     <% end %>
 
-    <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+    <%= render FlatPack::Card::Component.new do |card| %>
       <% card.header do %>
         <%= render FlatPack::PageTitle::Component.new(title: "Metadata", variant: :h3, class: "mb-0 pb-0") %>
       <% end %>
@@ -115,7 +115,7 @@
       <% end %>
     <% end %>
 
-    <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+    <%= render FlatPack::Card::Component.new do |card| %>
       <% card.header do %>
         <%= render FlatPack::PageTitle::Component.new(title: "Links", variant: :h3, class: "mb-0 pb-0") %>
       <% end %>
@@ -128,7 +128,7 @@
       <% end %>
     <% end %>
 
-    <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+    <%= render FlatPack::Card::Component.new do |card| %>
       <% card.header do %>
         <%= render FlatPack::PageTitle::Component.new(title: "Images", variant: :h3, class: "mb-0 pb-0") %>
       <% end %>
@@ -136,9 +136,9 @@
         <%= render FlatPack::Table::Component.new(data: @page.images, min_width: :lg) do |table| %>
           <% table.column(title: "URL") { |image| image[:url] } %>
           <% table.column(title: "Alt") { |image| image[:alt] } %>
-          <% table.column(title: "Width") { |image| image[:width] } %>
-          <% table.column(title: "Height") { |image| image[:height] } %>
-          <% table.column(title: "Source") { |image| image[:dimension_source] } %>
+          <% table.column(title: "Width") { |image| image[:width].to_s } %>
+          <% table.column(title: "Height") { |image| image[:height].to_s } %>
+          <% table.column(title: "Source") { |image| image[:dimension_source].to_s } %>
           <% table.column(title: "Variants") { |image| Array(image[:variants]).map { |variant| [variant[:width_hint], variant[:url]].compact.join(" ") }.join(", ") } %>
         <% end %>
       <% end %>
@@ -151,7 +151,7 @@
         description: @paywall_error
       ) %>
     <% elsif @paywall %>
-      <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+      <%= render FlatPack::Card::Component.new do |card| %>
         <% card.header do %>
           <%= render FlatPack::PageTitle::Component.new(
             title: "Paywall",
