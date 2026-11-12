@@ -13,10 +13,12 @@ module RecordingStudio
 
       OPENAPI = {
         title: "Web Reader - Read",
-        summary: "Web Reader - Read",
+        summary: "Visit one public page and return what is there",
         description: "Visit one public http or https URL and return the normalized page. " \
                      "The same safety checks as RecordingStudio::WebReader.read apply. " \
-                     "Private, metadata, and userinfo URLs are refused.",
+                     "Private, metadata, and userinfo URLs are refused. " \
+                     "The host's configured fetch strategy is always used. " \
+                     "This endpoint has no strategy query parameter.",
         tags: ["Web Reader"],
         parameters: [
           {
@@ -24,13 +26,6 @@ module RecordingStudio
             in: "query",
             required: true,
             description: "Absolute http or https URL to visit.",
-            schema: { type: "string" }
-          },
-          {
-            name: "strategy",
-            in: "query",
-            required: false,
-            description: "Registered fetch strategy. Omit to use the configured default.",
             schema: { type: "string" }
           }
         ]
@@ -43,26 +38,21 @@ module RecordingStudio
             type: :string,
             required: true,
             description: "Absolute http or https URL to visit."
-          },
-          strategy: {
-            type: :string,
-            required: false,
-            description: "Registered fetch strategy. Omit to use the configured default."
           }
         }
       }.freeze
 
       class << self
         def register!
-          return unless available?
+          return unless defined?(::RecordingStudioApi)
 
           registered = false
-          each_api_name do |api_name|
-            next if already_registered?(api: api_name)
+          RecordingStudioApi.configuration.each_api do |api|
+            next if already_registered?(api: api.name)
 
             RecordingStudioApi.register_endpoint(
               NAME,
-              api: api_name,
+              api: api.name,
               http_verb: :get,
               path: PATH,
               handler: Read,
@@ -74,31 +64,10 @@ module RecordingStudio
           registered || nil
         end
 
-        def available?
-          defined?(RecordingStudioApi) &&
-            RecordingStudioApi.respond_to?(:register_endpoint) &&
-            RecordingStudioApi.respond_to?(:registered_endpoint)
-        end
-
         def already_registered?(api: :public)
-          return false unless available?
+          return false unless defined?(::RecordingStudioApi)
 
           RecordingStudioApi.registered_endpoint(NAME, api: api).present?
-        end
-
-        def each_api_name
-          return enum_for(:each_api_name) unless block_given?
-          return yield(:public) unless RecordingStudioApi.respond_to?(:configuration)
-
-          configuration = RecordingStudioApi.configuration
-          unless configuration.respond_to?(:each_api)
-            yield(:public)
-            return
-          end
-
-          configuration.each_api do |api|
-            yield api.respond_to?(:name) ? api.name : :public
-          end
         end
       end
     end

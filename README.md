@@ -254,7 +254,7 @@ This gem does not depend on Recording Studio API. When that gem is already loade
 GET /recording_studio_api/api/v1/web_reader/read?url=https://example.com/article
 ```
 
-The handler authorizes `:view` on the request root through Accessible, then calls `RecordingStudio::WebReader.read`. Pass `strategy` to choose a registered fetcher. Unsafe and invalid URLs stay refused.
+The handler authorizes `:view` on the request root through Accessible, then calls `RecordingStudio::WebReader.read` with the host's configured fetch strategy. There is no `strategy` query parameter. Unsafe URLs, invalid URLs, registry errors, and unsupported content types return 422. Fetch failures re-raise; Recording Studio API has no 502 error class.
 
 ## Instrumentation
 

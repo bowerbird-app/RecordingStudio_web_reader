@@ -166,13 +166,19 @@ class RecordingStudioWebReaderTest < Minitest::Test
     initializer_source = File.read(initializer_path)
 
     assert_includes initializer_source, "config.require_recordable_declarations = true"
-    assert_includes initializer_source, "\"Workspace\""
-    assert_includes initializer_source, "\"Folder\""
-    assert_includes initializer_source, "\"Page\""
-    assert_includes initializer_source, "\"RecordingStudioApi::AdminApi\""
+    assert_includes initializer_source, "config.recordable_types = [ \"Workspace\", \"Folder\", \"Page\" ]"
+    assert_includes initializer_source, "config.recordable_types += [\"RecordingStudioApi::AdminApi\"]"
     refute_includes initializer_source, "config.include_children"
     refute_includes initializer_source, "config.features."
     refute_includes initializer_source, "v3"
+  end
+
+  def test_recording_studio_accessible_keeps_user_actors_and_adds_api_clients
+    initializer_path = File.expand_path("dummy/config/initializers/recording_studio_accessible.rb", __dir__)
+    initializer_source = File.read(initializer_path)
+
+    assert_includes initializer_source, "config.access_actor_types = [ \"User\" ]"
+    assert_includes initializer_source, "config.access_actor_types += [\"RecordingStudioApi::ApiClient\"]"
   end
 
   def test_dummy_readme_explains_dummy_app_purpose

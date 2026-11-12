@@ -6,7 +6,7 @@
 
 ### Added
 
-- Register `web_reader.read` on Recording Studio API when that gem is loaded. `GET web_reader/read` authorizes `:view` on the request root through Accessible and calls `RecordingStudio::WebReader.read`. MCP advertises the endpoint automatically.
+- Register `web_reader.read` on Recording Studio API when that gem is loaded. `GET web_reader/read` authorizes `:view` on the request root through Accessible and calls `RecordingStudio::WebReader.read` with the host's configured fetch strategy. There is no `strategy` query parameter. Invalid URLs, unsafe URLs, registry errors, and unsupported content types map to `RecordingStudioApi::InvalidActionInputError`. Fetch, timeout, redirect, and oversized-response failures re-raise; Recording Studio API has no 502 error class. MCP advertises the endpoint automatically.
 - Dummy mounts Recording Studio API `v0.21.3` in development and test, with Admin, Icons, Moveable, and Redis so the engine can boot.
 
 ### Upgrade

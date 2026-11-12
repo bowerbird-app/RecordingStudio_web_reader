@@ -33,9 +33,14 @@ class ApiTest < Minitest::Test
   end
 
   def test_register_is_a_noop_when_api_is_unavailable
-    RecordingStudio::WebReader::Api.stub(:available?, false) do
-      assert_nil RecordingStudio::WebReader::Api.register!
-    end
+    api = File.read(File.expand_path("../lib/recording_studio_web_reader/api.rb", __dir__))
+
+    assert_includes api, "return unless defined?(::RecordingStudioApi)"
+    refute_includes api, "respond_to?(:register_endpoint)"
+    refute_includes api, "respond_to?(:registered_endpoint)"
+    refute_includes api, "respond_to?(:configuration)"
+    refute_includes api, "respond_to?(:each_api)"
+    refute_includes api, "respond_to?(:name)"
   end
 
   def test_gemspec_omits_runtime_recording_studio_api_dependency
@@ -58,15 +63,20 @@ class ApiTest < Minitest::Test
     assert_includes engine, 'initializer "recording_studio_web_reader.api"'
     assert_includes engine, "RecordingStudio::WebReader::Api.register!"
     assert_includes api, "RecordingStudioApi.register_endpoint"
-    assert_includes api, "return unless available?"
-    assert_includes api, "each_api"
+    assert_includes api, "return unless defined?(::RecordingStudioApi)"
+    assert_includes api, "RecordingStudioApi.configuration.each_api"
+    assert_includes api, "api.name"
     assert_includes api, "NAME = \"web_reader.read\""
     assert_includes api, "handler: Read"
     assert_includes api, "http_verb: :get"
     assert_includes api, "path: PATH"
     assert_includes api, "PATH = \"web_reader/read\""
     assert_includes api, 'title: "Web Reader - Read"'
-    assert_includes api, 'summary: "Web Reader - Read"'
+    assert_includes api, 'summary: "Visit one public page and return what is there"'
+    assert_includes api, "The host's configured fetch strategy is always used."
+    assert_includes api, "This endpoint has no strategy query parameter."
+    refute_includes api, "name: \"strategy\""
+    refute_includes api, "respond_to?"
     assert_includes api, "reject_unknown: false"
     refute_includes api, "register_capability_action"
     refute File.exist?(File.expand_path("../lib/recording_studio_web_reader/mcp.rb", __dir__))
@@ -74,6 +84,8 @@ class ApiTest < Minitest::Test
     assert_includes read, "RecordingStudio::WebReader.read"
     assert_includes read, "role: VIEW_ROLE"
     assert_includes read, "InvalidActionInputError"
+    refute_includes read, "read_options"
+    refute_includes read, "params[:strategy]"
     refute_includes read, "Pundit"
     refute_includes read, "probe_image"
     refute_includes read, "extract("
@@ -82,11 +94,16 @@ class ApiTest < Minitest::Test
 
   def test_read_registration_is_idempotent
     registrations = []
-    RecordingStudioApi.stub(:registered_endpoint, ->(*) { registrations.first }) do
-      RecordingStudioApi.stub(:register_endpoint, lambda { |name, **options|
-        registrations << { name: name, **options }
-      }) do
-        RecordingStudio::WebReader::Api.stub(:each_api_name, ->(&block) { block.call(:public) }) do
+    configuration = Object.new
+    def configuration.each_api
+      yield Struct.new(:name).new(:public)
+    end
+
+    RecordingStudioApi.stub(:configuration, configuration) do
+      RecordingStudioApi.stub(:registered_endpoint, ->(*) { registrations.first }) do
+        RecordingStudioApi.stub(:register_endpoint, lambda { |name, **options|
+          registrations << { name: name, **options }
+        }) do
           2.times { RecordingStudio::WebReader::Api.register! }
         end
       end
@@ -132,7 +149,7 @@ class ApiTest < Minitest::Test
       page
     }) do
       payload = RecordingStudio::WebReader::Api::Read.call(
-        FakeContext.new(params: { url: "https://example.com/article", strategy: "http" })
+        FakeContext.new(params: { url: "https://example.com/article" })
       )
 
       assert_equal "Stubbed article", payload.fetch("title")
@@ -140,7 +157,7 @@ class ApiTest < Minitest::Test
     end
 
     assert_equal "https://example.com/article", captured[:url]
-    assert_equal({ strategy: "http" }, captured[:kwargs])
+    assert_equal({}, captured[:kwargs])
   end
 
   def test_read_denies_unauthorized_callers
@@ -171,5 +188,58 @@ class ApiTest < Minitest::Test
     end
 
     assert_equal "The URL is not allowed", error.message
+  end
+
+  def test_read_maps_registry_error_to_invalid_input
+    assert_maps_to_invalid_input(RecordingStudio::WebReader::RegistryError, "fetcher :http is already registered")
+  end
+
+  def test_read_maps_unsupported_content_type_to_invalid_input
+    assert_maps_to_invalid_input(
+      RecordingStudio::WebReader::UnsupportedContentTypeError,
+      "The content type is not supported"
+    )
+  end
+
+  def test_read_rethrows_fetch_error
+    assert_rethrows(RecordingStudio::WebReader::FetchError, "The page could not be fetched")
+  end
+
+  def test_read_rethrows_timeout_error
+    assert_rethrows(RecordingStudio::WebReader::TimeoutError, "The request timed out")
+  end
+
+  def test_read_rethrows_too_many_redirects
+    assert_rethrows(RecordingStudio::WebReader::TooManyRedirectsError, "The page redirected too many times")
+  end
+
+  def test_read_rethrows_response_too_large
+    assert_rethrows(RecordingStudio::WebReader::ResponseTooLargeError, "The response was too large")
+  end
+
+  private
+
+  def assert_maps_to_invalid_input(error_class, message)
+    RecordingStudio::WebReader.stub(:read, ->(*) { raise error_class, message }) do
+      error = assert_raises(RecordingStudioApi::InvalidActionInputError) do
+        RecordingStudio::WebReader::Api::Read.call(
+          FakeContext.new(params: { url: "https://example.com/article" })
+        )
+      end
+
+      assert_equal message, error.message
+    end
+  end
+
+  def assert_rethrows(error_class, message)
+    RecordingStudio::WebReader.stub(:read, ->(*) { raise error_class, message }) do
+      error = assert_raises(error_class) do
+        RecordingStudio::WebReader::Api::Read.call(
+          FakeContext.new(params: { url: "https://example.com/article" })
+        )
+      end
+
+      assert_equal message, error.message
+    end
   end
 end
