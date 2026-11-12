@@ -14,6 +14,7 @@ require "recording_studio_web_reader/document"
 require "recording_studio_web_reader/registry"
 require "recording_studio_web_reader/read"
 require "recording_studio_web_reader/ai_tool"
+require "recording_studio_web_reader/api"
 require "recording_studio_web_reader/host_boot"
 require "recording_studio_web_reader/engine"
 

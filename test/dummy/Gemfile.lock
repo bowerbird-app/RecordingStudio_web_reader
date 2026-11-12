@@ -33,6 +33,37 @@ GIT
       recording_studio_trashable (~> 0.10)
 
 GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_admin.git
+  revision: b68d6a33c09912210f6892daba8e975404c29b21
+  tag: v2.8.2
+  specs:
+    recording_studio_admin (2.8.2)
+      flat_pack (>= 0.1.341)
+      rails (~> 8.1.0)
+      recording_studio (>= 6.3.0)
+      recording_studio_accessible (~> 0.6)
+      recording_studio_logs (>= 0.4.1, < 1.0)
+      recording_studio_trashable (~> 0.10)
+      view_component (>= 4.14, < 5)
+
+GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_api.git
+  revision: 752f524d925426978826b536d5b33a102bffae5d
+  tag: v0.21.3
+  specs:
+    recording_studio_api (0.21.3)
+      flat_pack (>= 0.1.341)
+      rails (~> 8.1.0)
+      recording_studio (>= 6.1.0)
+      recording_studio_accessible (~> 0.11)
+      recording_studio_logs (>= 0.4.1, < 1.0)
+      recording_studio_metrics (>= 0.3.0, < 1.0)
+      recording_studio_moveable (~> 4.0)
+      recording_studio_trashable (~> 0.10)
+      redis (~> 5.3)
+      view_component (>= 4.14, < 5)
+
+GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_cache.git
   revision: 4d123db79226a1f18ce1289e09c867a5f9ed335c
   tag: v0.6.2
@@ -40,6 +71,15 @@ GIT
     recording_studio_cache (0.6.2)
       rails (~> 8.1.0)
       recording_studio (>= 6.1.0)
+
+GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_icons.git
+  revision: 329fbbb1d75bba3b1cc59f0b00650442f2433288
+  tag: v0.2.0
+  specs:
+    recording_studio_icons (0.2.0)
+      rails (>= 8.1.0)
+      recording_studio (>= 6.3.0)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_logs.git
@@ -59,6 +99,19 @@ GIT
     recording_studio_metrics (0.7.2)
       rails (~> 8.1.0)
       recording_studio (>= 6.1.0)
+
+GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_moveable.git
+  revision: 8fac42eae770d04938957b3225ebc617ab04617e
+  tag: v4.1.1
+  specs:
+    recording_studio_moveable (4.1.1)
+      flat_pack (>= 0.1.331)
+      rails (>= 8.1.0, < 9.0)
+      recording_studio (>= 6.1.0)
+      recording_studio_accessible (~> 0.6)
+      recording_studio_icons (>= 0.1.0)
+      view_component (>= 4.14, < 5)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_root_switchable.git
@@ -99,7 +152,7 @@ GIT
 PATH
   remote: ../..
   specs:
-    recording_studio_web_reader (0.3.0)
+    recording_studio_web_reader (0.4.0)
       nokogiri (>= 1.16)
       rails (~> 8.1.0)
       recording_studio (>= 6.3.0)
@@ -397,6 +450,10 @@ GEM
       prism (>= 1.6.0)
       rbs (>= 4.0.0)
       tsort
+    redis (5.4.1)
+      redis-client (>= 0.22.0)
+    redis-client (0.31.0)
+      connection_pool
     regexp_parser (2.11.3)
     reline (0.7.0)
       io-console (~> 0.5)
@@ -538,13 +595,18 @@ DEPENDENCIES
   rails (~> 8.1.1)
   recording_studio!
   recording_studio_accessible!
+  recording_studio_admin!
   recording_studio_ai!
+  recording_studio_api!
   recording_studio_cache!
+  recording_studio_icons!
   recording_studio_logs!
   recording_studio_metrics!
+  recording_studio_moveable!
   recording_studio_root_switchable!
   recording_studio_trashable!
   recording_studio_web_reader!
+  redis (~> 5.3)
   rubocop-rails-omakase
   solid_cable
   solid_cache
@@ -675,13 +737,19 @@ CHECKSUMS
   rdoc (8.1.0) sha256=befc37880a5cfd36dcb176c748b5fd5ee39dd3536a75e81824e4972ce230f60a
   recording_studio (6.3.0)
   recording_studio_accessible (0.24.1)
+  recording_studio_admin (2.8.2)
   recording_studio_ai (0.19.6)
+  recording_studio_api (0.21.3)
   recording_studio_cache (0.6.2)
+  recording_studio_icons (0.2.0)
   recording_studio_logs (0.7.3)
   recording_studio_metrics (0.7.2)
+  recording_studio_moveable (4.1.1)
   recording_studio_root_switchable (0.11.5)
   recording_studio_trashable (0.12.2)
-  recording_studio_web_reader (0.3.0)
+  recording_studio_web_reader (0.4.0)
+  redis (5.4.1) sha256=b5e675b57ad22b15c9bcc765d5ac26f60b675408af916d31527af9bd5a81faae
+  redis-client (0.31.0) sha256=6820cb2a21e6795a823141f50fd25e655de2b8dc8ff833b43509a27b0263fd75
   regexp_parser (2.11.3) sha256=ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4
   reline (0.7.0) sha256=5b012d8e55dbf9d450f12bde2cf7d15ff546ae80b3f8f3b30e570d431815583d
   responders (3.2.1) sha256=c2772970cbda654c0e772d852e5a851e82cd8e96f5fa958650861ba75b8ffa84

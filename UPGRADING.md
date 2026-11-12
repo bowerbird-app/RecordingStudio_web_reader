@@ -1,3 +1,9 @@
+# Upgrading to 0.4.0
+
+1. `RecordingStudio::WebReader.read` is unchanged. Default fetch strategy stays `:http`. SSRF checks are unchanged.
+2. When Recording Studio API is loaded, this gem registers `GET /recording_studio_api/api/v1/web_reader/read`. Callers need `:view` on the request root. The endpoint uses the host's configured fetch strategy and has no `strategy` query parameter. There is no new gemspec dependency. MCP advertises the endpoint from that registration; this gem does not add an MCP tool.
+3. Dummy development and test now pin Recording Studio API `v0.21.3` plus Admin, Icons, Moveable, Redis, and FlatPack `v0.1.341`.
+
 # Upgrading to 0.3.0
 
 1. Require Recording Studio `>= 6.3.0`. The dummy pins tag `v6.3.0`.

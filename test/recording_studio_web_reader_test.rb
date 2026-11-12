@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioWebReaderTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.3.0", ::RecordingStudio::WebReader::VERSION
+    assert_equal "0.4.0", ::RecordingStudio::WebReader::VERSION
   end
 
   def test_engine_exists
@@ -56,7 +56,15 @@ class RecordingStudioWebReaderTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.3"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_AI", tag: "v0.19.6"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.21.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.8.2"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.2.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v4.1.1"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
+    assert_includes gemfile, 'gem "redis", "~> 5.3"'
+    schema = File.read(File.expand_path("dummy/db/schema.rb", __dir__))
+    assert_includes schema, 'create_table "recording_studio_api_api_clients"'
+    assert_includes schema, 'create_table "recording_studio_api_api_credentials"'
     assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"'
     assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
     refute_includes initializer, "config.layout ="
@@ -159,9 +167,18 @@ class RecordingStudioWebReaderTest < Minitest::Test
 
     assert_includes initializer_source, "config.require_recordable_declarations = true"
     assert_includes initializer_source, "config.recordable_types = [ \"Workspace\", \"Folder\", \"Page\" ]"
+    assert_includes initializer_source, "config.recordable_types += [\"RecordingStudioApi::AdminApi\"]"
     refute_includes initializer_source, "config.include_children"
     refute_includes initializer_source, "config.features."
     refute_includes initializer_source, "v3"
+  end
+
+  def test_recording_studio_accessible_keeps_user_actors_and_adds_api_clients
+    initializer_path = File.expand_path("dummy/config/initializers/recording_studio_accessible.rb", __dir__)
+    initializer_source = File.read(initializer_path)
+
+    assert_includes initializer_source, "config.access_actor_types = [ \"User\" ]"
+    assert_includes initializer_source, "config.access_actor_types += [\"RecordingStudioApi::ApiClient\"]"
   end
 
   def test_dummy_readme_explains_dummy_app_purpose
@@ -182,6 +199,7 @@ class RecordingStudioWebReaderTest < Minitest::Test
     assert_includes readme, "v0.1.341"
     assert_includes readme, "v0.24.1"
     assert_includes readme, "v0.19.6"
+    assert_includes readme, "v0.21.3"
     refute_includes readme, "v0.1.133"
     refute_includes readme, "v3 declarations"
     refute_includes readme, "RecordingStudio v3"

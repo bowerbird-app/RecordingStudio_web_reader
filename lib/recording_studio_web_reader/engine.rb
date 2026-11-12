@@ -123,6 +123,10 @@ module RecordingStudio
           end
         end
       end
+
+      initializer "recording_studio_web_reader.api" do
+        config.to_prepare { RecordingStudio::WebReader::Api.register! }
+      end
     end
   end
 end

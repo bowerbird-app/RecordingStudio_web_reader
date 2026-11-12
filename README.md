@@ -246,6 +246,16 @@ This gem does not depend on Recording Studio AI. When that gem is already loaded
 
 The tool takes `url` and an optional `content` argument. `summary` is the default. It returns a short reading: text capped at 8,000 characters, 25 links, and 15 images. `full` returns the readable text, up to 200 links, and up to 50 images. Raw HTML stays out either way. If the result would pass 200,000 bytes, JSON-LD and other metadata go first, then links and images, then the text. `text_truncated`, `link_count`, and `image_count` say what was left out. `challenge` is included. The Ruby page is still complete.
 
+## Recording Studio API
+
+This gem does not depend on Recording Studio API. When that gem is already loaded, the engine registers `web_reader.read`. MCP advertises registered endpoints automatically. This gem does not add an MCP tool.
+
+```text
+GET /recording_studio_api/api/v1/web_reader/read?url=https://example.com/article
+```
+
+The handler authorizes `:view` on the request root through Accessible, then calls `RecordingStudio::WebReader.read` with the host's configured fetch strategy. There is no `strategy` query parameter. Unsafe URLs, invalid URLs, registry errors, and unsupported content types return 422. Fetch failures re-raise; Recording Studio API has no 502 error class.
+
 ## Instrumentation
 
 Subscribers receive `read.recording_studio_web_reader` and `probe_image.recording_studio_web_reader` through `ActiveSupport::Notifications`.
@@ -314,6 +324,10 @@ RecordingStudio::WebReader.register_fetcher(:browser, MyGem::Browser, override: 
 
 The callable receives one hop. The hop includes `url`, `address`, `host`, `port`, `https`, timeouts, `max_bytes`, `user_agent`, and `on_overflow`. Connect to `address`. Return `status`, `headers`, `body`, `content_type`, `location`, and that same `address`. A missing or different address is refused. Do not follow redirects inside the fetcher. The reader does that, and it checks every target.
 
+## Upgrade to 0.4.0
+
+`read` still uses HTTP unless you pass `strategy:`. Hosts that load Recording Studio API get `web_reader.read`. See `UPGRADING.md`.
+
 ## Upgrade to 0.3.0
 
 Require Recording Studio `>= 6.3.0`. Engine screens use `recording_studio_layout` and `configuration.layout`. See `UPGRADING.md`. `read` still uses HTTP unless you pass `strategy:`.
@@ -336,4 +350,4 @@ The dummy app is a signed-in developer page. Enter a URL and inspect the final U
 
 Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key.
 
-The dummy Gemfile pins Recording Studio `v6.3.0`, FlatPack `v0.1.341`, Accessible `v0.24.1`, Trashable `v0.12.2`, Root Switchable `v0.11.5`, Cache `v0.6.2`, Metrics `v0.7.2`, Logs `v0.7.3`, and AI `v0.19.6`. Sign in at `/users/sign_in` with `admin@admin.com` and `Password`.
+The dummy Gemfile pins Recording Studio `v6.3.0`, FlatPack `v0.1.341`, Accessible `v0.24.1`, Trashable `v0.12.2`, Root Switchable `v0.11.5`, Cache `v0.6.2`, Metrics `v0.7.2`, Logs `v0.7.3`, and AI `v0.19.6`. Development and test also pin Recording Studio API `v0.21.3`, Admin `v2.8.2`, Icons `v0.2.0`, Moveable `v4.1.1`, and Redis. Sign in at `/users/sign_in` with `admin@admin.com` and `Password`. The API is mounted at `/recording_studio_api`.
