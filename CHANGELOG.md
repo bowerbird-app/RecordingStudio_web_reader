@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-12
+
+### Added
+
+- Register `web_reader.read` on Recording Studio API when that gem is loaded. `GET web_reader/read` authorizes `:view` on the request root through Accessible and calls `RecordingStudio::WebReader.read`. MCP advertises the endpoint automatically.
+- Dummy mounts Recording Studio API `v0.21.3` in development and test, with Admin, Icons, Moveable, and Redis so the engine can boot.
+
+### Upgrade
+
+- See `UPGRADING.md`. `read` is unchanged. Hosts that already load Recording Studio API get the endpoint after this version. There is no gemspec dependency on `recording_studio_api`.
+
 ## [0.3.0] - 2026-11-05
 
 ### Changed
@@ -111,6 +122,7 @@
 - The dummy page can open a URL in Chrome when you choose **Open in a browser**.
 - The dummy page asks Jev whether a paywall holds the writing back.
 
+[0.4.0]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.8...v0.3.0
 [0.2.8]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.6...v0.2.7
