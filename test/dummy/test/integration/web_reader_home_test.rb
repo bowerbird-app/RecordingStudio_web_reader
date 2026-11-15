@@ -15,7 +15,7 @@ class WebReaderHomeTest < ActionDispatch::IntegrationTest
     Current.actor = @user
     Workspace.find_or_create_by!(name: "Studio Workspace")
     Workspace.order(:name).each do |workspace|
-      grant_reader_access(RecordingStudio.root_recording_for(workspace))
+      grant_reader_access(RecordingStudio.create_root_recording!(workspace, actor: @user))
     end
   ensure
     Current.actor = nil

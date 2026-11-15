@@ -324,6 +324,10 @@ RecordingStudio::WebReader.register_fetcher(:browser, MyGem::Browser, override: 
 
 The callable receives one hop. The hop includes `url`, `address`, `host`, `port`, `https`, timeouts, `max_bytes`, `user_agent`, and `on_overflow`. Connect to `address`. Return `status`, `headers`, `body`, `content_type`, `location`, and that same `address`. A missing or different address is refused. Do not follow redirects inside the fetcher. The reader does that, and it checks every target.
 
+## Upgrade to 0.5.0
+
+Require Recording Studio `>= 7.0`, `< 8.0`. Create roots with `create_root_recording!`. `root_recording_for` only finds an existing root. See `UPGRADING.md`. `read` still uses HTTP unless you pass `strategy:`.
+
 ## Upgrade to 0.4.0
 
 `read` still uses HTTP unless you pass `strategy:`. Hosts that load Recording Studio API get `web_reader.read`. See `UPGRADING.md`.
@@ -350,4 +354,4 @@ The dummy app is a signed-in developer page. Enter a URL and inspect the final U
 
 Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key.
 
-The dummy Gemfile pins Recording Studio `v6.3.0`, FlatPack `v0.1.341`, Accessible `v0.24.1`, Trashable `v0.12.2`, Root Switchable `v0.11.5`, Cache `v0.6.2`, Metrics `v0.7.2`, Logs `v0.7.3`, and AI `v0.19.6`. Development and test also pin Recording Studio API `v0.21.3`, Admin `v2.8.2`, Icons `v0.2.0`, Moveable `v4.1.1`, and Redis. Sign in at `/users/sign_in` with `admin@admin.com` and `Password`. The API is mounted at `/recording_studio_api`.
+The dummy Gemfile pins Recording Studio `v7.0.0`, FlatPack `v0.1.376`, Accessible `v0.44.0`, Trashable `v0.17.0`, Root Switchable `v0.16.0`, Cache `v0.6.3`, Metrics `v0.9.0`, Logs `v0.8.0`, and AI `v0.22.0`. Development and test also pin Recording Studio API `v0.24.0`, Admin `v2.16.0`, Icons `v0.2.1`, Moveable `v5.0.0`, and Redis. Sign in at `/users/sign_in` with `admin@admin.com` and `Password`. The API is mounted at `/recording_studio_api`.

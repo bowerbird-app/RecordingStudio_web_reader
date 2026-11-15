@@ -1,3 +1,10 @@
+# Upgrading to 0.5.0
+
+1. Require Recording Studio `>= 7.0`, `< 8.0`. The dummy pins tag `v7.0.0`.
+2. `root_recording_for` only finds a root. Create one with `create_root_recording!(recordable, actor:)`. The dummy `authorize_write` callback allows a present actor, including when `recording`, `root_recording`, and `parent_recording` are nil.
+3. Copy the Recording Studio events `root_recording_id` migration. Trashable 0.17 removed `kept_sql`; use `Recording.kept`. Admin 2.16 uses `access_recording_resolver`.
+4. `read` is unchanged. Default fetch strategy stays `:http`.
+
 # Upgrading to 0.4.0
 
 1. `RecordingStudio::WebReader.read` is unchanged. Default fetch strategy stays `:http`. SSRF checks are unchanged.
