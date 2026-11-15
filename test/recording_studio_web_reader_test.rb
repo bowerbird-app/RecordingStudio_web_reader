@@ -4,17 +4,17 @@ require "test_helper"
 
 class RecordingStudioWebReaderTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.4.0", ::RecordingStudio::WebReader::VERSION
+    assert_equal "0.5.0", ::RecordingStudio::WebReader::VERSION
   end
 
   def test_engine_exists
     assert_kind_of Class, ::RecordingStudio::WebReader::Engine
   end
 
-  def test_gemspec_pins_recording_studio_6_3
+  def test_gemspec_pins_recording_studio_7
     gemspec = File.read(File.expand_path("../recording_studio_web_reader.gemspec", __dir__))
 
-    assert_includes gemspec, 'spec.add_dependency "recording_studio", ">= 6.3.0"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio", ">= 7.0", "< 8.0"'
   end
 
   def test_gemspec_excludes_cursor_config
@@ -41,32 +41,35 @@ class RecordingStudioWebReaderTest < Minitest::Test
     assert_includes install_script, "fetch-skills.sh"
   end
 
-  def test_dummy_gemfile_pins_verified_6x_github_tags
+  def test_dummy_gemfile_pins_verified_core_7_github_tags
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
     root_gemfile = File.read(File.expand_path("../Gemfile", __dir__))
     initializer = File.read(
       File.expand_path("dummy/config/initializers/recording_studio_root_switchable.rb", __dir__)
     )
 
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.2"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.11.5"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.6.2"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.2"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_AI", tag: "v0.19.6"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.21.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.8.2"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.2.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v4.1.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v7.0.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.44.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.17.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.16.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.6.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.8.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_AI", tag: "v0.22.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.24.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.16.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.2.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v5.0.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.376"'
+    assert_includes gemfile, 'gem "puma", "8.1.0"'
+    assert_includes gemfile, 'gem "msgpack", ">= 1.8.7"'
     assert_includes gemfile, 'gem "redis", "~> 5.3"'
     schema = File.read(File.expand_path("dummy/db/schema.rb", __dir__))
     assert_includes schema, 'create_table "recording_studio_api_api_clients"'
     assert_includes schema, 'create_table "recording_studio_api_api_credentials"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v7.0.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.376"'
+    assert_includes root_gemfile, 'gem "puma", "8.1.0"'
     refute_includes initializer, "config.layout ="
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v4.7.0"'
@@ -166,6 +169,7 @@ class RecordingStudioWebReaderTest < Minitest::Test
     initializer_source = File.read(initializer_path)
 
     assert_includes initializer_source, "config.require_recordable_declarations = true"
+    assert_includes initializer_source, "config.authorize_write = lambda { |actor:, **|"
     assert_includes initializer_source, "config.recordable_types = [ \"Workspace\", \"Folder\", \"Page\" ]"
     assert_includes initializer_source, "config.recordable_types += [\"RecordingStudioApi::AdminApi\"]"
     refute_includes initializer_source, "config.include_children"
@@ -195,11 +199,11 @@ class RecordingStudioWebReaderTest < Minitest::Test
     readme = File.read(File.expand_path("../README.md", __dir__))
 
     assert_includes readme, "RecordingStudio"
-    assert_includes readme, "v6.3.0"
-    assert_includes readme, "v0.1.341"
-    assert_includes readme, "v0.24.1"
-    assert_includes readme, "v0.19.6"
-    assert_includes readme, "v0.21.3"
+    assert_includes readme, "v7.0.0"
+    assert_includes readme, "v0.1.376"
+    assert_includes readme, "v0.44.0"
+    assert_includes readme, "v0.22.0"
+    assert_includes readme, "v0.24.0"
     refute_includes readme, "v0.1.133"
     refute_includes readme, "v3 declarations"
     refute_includes readme, "RecordingStudio v3"

@@ -18,7 +18,7 @@ module DummyAccess
 
     as_actor(actor) do
       workspace = Workspace.find_or_create_by!(name: name)
-      root = RecordingStudio.root_recording_for(workspace)
+      root = RecordingStudio.create_root_recording!(workspace, actor: actor)
       result = RecordingStudioAccessible.bootstrap_owner_access!(recording: root, actor: actor)
       raise(result.error.presence || "Accessible bootstrap failed") if result.failure?
 

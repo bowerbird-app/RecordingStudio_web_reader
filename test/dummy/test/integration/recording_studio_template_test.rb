@@ -20,6 +20,7 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     connection = ActiveRecord::Base.connection
 
     assert connection.column_exists?(:recording_studio_recordings, :root_recording_id)
+    assert connection.column_exists?(:recording_studio_events, :root_recording_id)
     assert connection.table_exists?(:recording_studio_accesses)
     refute connection.table_exists?(:recording_studio_access_boundaries)
     refute connection.table_exists?(:recording_studio_device_sessions)

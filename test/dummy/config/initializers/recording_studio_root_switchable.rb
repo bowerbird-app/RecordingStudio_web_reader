@@ -18,10 +18,16 @@ RecordingStudioRootSwitchable.configure do |config|
 
   config.scope :all_workspaces do |scope|
     scope.label = "All workspaces"
-    scope.description = "Every workspace root in the dummy app."
-    scope.available_roots = lambda do |**|
+    scope.description = "Workspace roots the actor can view."
+    # Root Switchable 0.16 requires Accessible :view on the current root.
+    # Listing only those roots keeps the mounted page from failing closed.
+    scope.available_roots = lambda do |actor:, **|
       Workspace.order(:name).filter_map do |workspace|
-        RecordingStudio.root_recording_for(workspace)
+        recording = RecordingStudio.root_recording_for(workspace)
+        next if recording.nil?
+        next unless actor.present? && RecordingStudioAccessible.authorized?(actor: actor, recording: recording, role: :view)
+
+        recording
       end
     end
     scope.access_check = ->(**) { true }

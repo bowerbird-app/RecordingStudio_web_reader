@@ -14,6 +14,12 @@ RecordingStudio.configure do |config|
   # Actor resolver for events when no actor is explicitly supplied
   config.actor = -> { Current.actor }
 
+  # create_root_recording! calls this with recording, root_recording, and
+  # parent_recording all nil. A present actor may write.
+  config.authorize_write = lambda { |actor:, **|
+    actor.present?
+  }
+
   # Emit ActiveSupport::Notifications events
   config.event_notifications_enabled = true
 

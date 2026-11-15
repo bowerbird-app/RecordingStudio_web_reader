@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-15
+
+### Changed
+
+- Require `recording_studio` `>= 7.0`, `< 8.0`.
+- Dummy and development pins move to Recording Studio `v7.0.0`, Accessible `v0.44.0`, Trashable `v0.17.0`, Root Switchable `v0.16.0`, Cache `v0.6.3`, Metrics `v0.9.0`, Logs `v0.8.0`, AI `v0.22.0`, FlatPack `v0.1.376`, API `v0.24.0`, Admin `v2.16.0`, Icons `v0.2.1`, and Moveable `v5.0.0`.
+- Dummy roots are created with `create_root_recording!`. `root_recording_for` only finds an existing root. The dummy `authorize_write` callback allows a present actor. Seeds use `Recording.kept`.
+- Dummy events gain `root_recording_id`. Lockfiles pin Puma `8.1.0` and msgpack `>= 1.8.7`.
+
+### Upgrade
+
+- See `UPGRADING.md`. `read` is unchanged. Hosts must run Recording Studio 7 and create roots with `create_root_recording!`.
+
 ## [0.4.0] - 2026-11-12
 
 ### Added
@@ -122,6 +135,7 @@
 - The dummy page can open a URL in Chrome when you choose **Open in a browser**.
 - The dummy page asks Jev whether a paywall holds the writing back.
 
+[0.5.0]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.8...v0.3.0
 [0.2.8]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.7...v0.2.8
