@@ -51,7 +51,7 @@ class ApiTest < Minitest::Test
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
     refute_includes gemspec, 'spec.add_development_dependency "recording_studio_api"'
     assert_includes gemfile, "recording_studio_api"
-    assert_includes dummy_gemfile, 'tag: "v0.24.0"'
+    assert_includes dummy_gemfile, 'tag: "v1.15.0"'
     assert_includes dummy_gemfile, "group :development, :test"
   end
 

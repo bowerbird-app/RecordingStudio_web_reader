@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-18
+
+### Changed
+
+- Development and dummy pins move to Recording Studio `v7.7.1`, FlatPack `v0.1.378`, Accessible `v0.54.0`, Trashable `v1.2.0`, Cache `v0.7.0`, Metrics `v0.9.1`, Logs `v0.8.1`, AI `v0.25.0`, API `v1.15.0`, Admin `v2.19.0`, Icons `v0.4.1`, and Moveable `v6.0.1`. Root Switchable stays `v0.16.0`.
+- The gemspec still requires `recording_studio` `>= 7.0`, `< 8.0`. The dummy adds a minimal `config/recording_studio_api.yml` so API 1.12+ can boot, and copies API `add_owner_to_recording_studio_api_api_clients` so API clients can store `owner_id`.
+- The dummy no longer registers `RecordingStudioApi::AdminApi`. API 1.15 declares that type only when an admin root is configured, and this dummy has none.
+
+### Upgrade
+
+- See `UPGRADING.md`. `read` is unchanged. Hosts that load Recording Studio API 1.15 need Accessible `>= 0.50` and Recording Studio `>= 7.7`.
+
 ## [0.5.0] - 2026-11-15
 
 ### Changed
@@ -135,6 +147,7 @@
 - The dummy page can open a URL in Chrome when you choose **Open in a browser**.
 - The dummy page asks Jev whether a paywall holds the writing back.
 
+[0.5.1]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_web_reader/compare/v0.2.8...v0.3.0

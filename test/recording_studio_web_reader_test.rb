@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioWebReaderTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.5.0", ::RecordingStudio::WebReader::VERSION
+    assert_equal "0.5.1", ::RecordingStudio::WebReader::VERSION
   end
 
   def test_engine_exists
@@ -48,27 +48,27 @@ class RecordingStudioWebReaderTest < Minitest::Test
       File.expand_path("dummy/config/initializers/recording_studio_root_switchable.rb", __dir__)
     )
 
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v7.0.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.44.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.17.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v7.7.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.54.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v1.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.16.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.6.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.8.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_AI", tag: "v0.22.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.24.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.16.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.2.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v5.0.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.376"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.7.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.8.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_AI", tag: "v0.25.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v1.15.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.19.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.4.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v6.0.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.378"'
     assert_includes gemfile, 'gem "puma", "8.1.0"'
     assert_includes gemfile, 'gem "msgpack", ">= 1.8.7"'
     assert_includes gemfile, 'gem "redis", "~> 5.3"'
     schema = File.read(File.expand_path("dummy/db/schema.rb", __dir__))
     assert_includes schema, 'create_table "recording_studio_api_api_clients"'
     assert_includes schema, 'create_table "recording_studio_api_api_credentials"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v7.0.0"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.376"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v7.7.1"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.378"'
     assert_includes root_gemfile, 'gem "puma", "8.1.0"'
     refute_includes initializer, "config.layout ="
     refute_includes gemfile, "recording_studio/v3.0.0"
@@ -171,7 +171,7 @@ class RecordingStudioWebReaderTest < Minitest::Test
     assert_includes initializer_source, "config.require_recordable_declarations = true"
     assert_includes initializer_source, "config.authorize_write = lambda { |actor:, **|"
     assert_includes initializer_source, "config.recordable_types = [ \"Workspace\", \"Folder\", \"Page\" ]"
-    assert_includes initializer_source, "config.recordable_types += [\"RecordingStudioApi::AdminApi\"]"
+    refute_includes initializer_source, "RecordingStudioApi::AdminApi"
     refute_includes initializer_source, "config.include_children"
     refute_includes initializer_source, "config.features."
     refute_includes initializer_source, "v3"
@@ -199,11 +199,11 @@ class RecordingStudioWebReaderTest < Minitest::Test
     readme = File.read(File.expand_path("../README.md", __dir__))
 
     assert_includes readme, "RecordingStudio"
-    assert_includes readme, "v7.0.0"
-    assert_includes readme, "v0.1.376"
-    assert_includes readme, "v0.44.0"
-    assert_includes readme, "v0.22.0"
-    assert_includes readme, "v0.24.0"
+    assert_includes readme, "v7.7.1"
+    assert_includes readme, "v0.1.378"
+    assert_includes readme, "v0.54.0"
+    assert_includes readme, "v0.25.0"
+    assert_includes readme, "v1.15.0"
     refute_includes readme, "v0.1.133"
     refute_includes readme, "v3 declarations"
     refute_includes readme, "RecordingStudio v3"

@@ -1,0 +1,2 @@
+# Minimal API config so Recording Studio API 1.12+ can boot. Hosts fill this in.
+shared: {}
