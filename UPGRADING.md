@@ -3,7 +3,7 @@
 1. This gem still requires Recording Studio `>= 7.0`, `< 8.0`. The dummy and development Gemfiles pin tag `v7.7.1`, because Accessible 0.54 and API 1.15 need Recording Studio `>= 7.7`.
 2. Also pin FlatPack `v0.1.378`, Accessible `v0.54.0`, Trashable `v1.2.0`, Cache `v0.7.0`, Metrics `v0.9.1`, Logs `v0.8.1`, AI `v0.25.0`, API `v1.15.0`, Admin `v2.19.0`, Icons `v0.4.1`, and Moveable `v6.0.1`. Root Switchable stays `v0.16.0`.
 3. When the host loads Recording Studio API 1.12 or later, add `config/recording_studio_api.yml`. The dummy uses a minimal file with `shared: {}`.
-4. Copy `add_owner_to_recording_studio_api_api_clients` when the host loads Recording Studio API 1.15. The dummy does. Do not copy the Recording Studio 7.4, 7.5, or 7.7 root-index migrations.
+4. Copy `add_owner_to_recording_studio_api_api_clients` when the host loads Recording Studio API 1.15. The dummy does. Hosts moving to Recording Studio 7.7 must run the Recording Studio 7.4, 7.5, and 7.7 root-index migrations. API 1.4 requires the 7.4 index, and API 1.7 requires the migrations through 7.7 (the 7.5 root invariant, then the 7.7 root index). Only this repo's dummy app leaves those Recording Studio migrations out.
 5. API 1.15 declares `AdminApi` only when an admin root is configured. A host with no admin root should not list `RecordingStudioApi::AdminApi` in `config.recordable_types`.
 6. `read` is unchanged. Default fetch strategy stays `:http`.
 

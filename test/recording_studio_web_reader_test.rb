@@ -172,6 +172,8 @@ class RecordingStudioWebReaderTest < Minitest::Test
     assert_includes initializer_source, "config.authorize_write = lambda { |actor:, **|"
     assert_includes initializer_source, "config.recordable_types = [ \"Workspace\", \"Folder\", \"Page\" ]"
     refute_includes initializer_source, "RecordingStudioApi::AdminApi"
+    api_initializer = File.read(File.expand_path("dummy/config/initializers/recording_studio_api.rb", __dir__))
+    refute_includes api_initializer, "RecordingStudioApi::AdminApi"
     refute_includes initializer_source, "config.include_children"
     refute_includes initializer_source, "config.features."
     refute_includes initializer_source, "v3"
